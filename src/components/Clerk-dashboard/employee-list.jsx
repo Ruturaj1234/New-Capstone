@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from "react";
 
 const EmployeeList = () => {
-  const [employees, setEmployees] = useState([]); // Ensure it's an empty array initially
+  const [employees, setEmployees] = useState([]); 
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [employeeDetails, setEmployeeDetails] = useState(null);
   const [viewDetails, setViewDetails] = useState(false);
+  const [isSalaryFormVisible, setIsSalaryFormVisible] = useState(false);
+  const [salaryDetails, setSalaryDetails] = useState({
+    salary_basic: "",
+    salary_da: "",
+    salary_hra: "",
+    salary_maintenance: ""
+  });
 
-  // Fetch employee list from the backend when the component mounts
   useEffect(() => {
     fetch("http://localhost/login-backend/fetchemployeedetails.php")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setEmployees(data); // Only set employees if data is an array
+          setEmployees(data); 
         } else {
           console.error("Fetched data is not an array", data);
         }
@@ -23,38 +29,73 @@ const EmployeeList = () => {
   }, []);
 
   const fetchEmployeeDetails = (employeeId) => {
-    console.log("Sending employee ID to backend:", employeeId); // Log the ID being sent to the backend
-    
     fetch("http://localhost/login-backend/fetchemployeedetails.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id: employeeId }), // Pass the employee ID correctly in the POST body
+      body: JSON.stringify({ id: employeeId }),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Employee details response:", data); // Log the response for debugging
         if (data && data[0]) {
-          setEmployeeDetails(data[0]); // Assuming data[0] contains the employee details
-          setViewDetails(true); // Navigate to the details view
-        } else if (data.error) {
-          console.error("Error fetching employee details:", data.error);
-        } else {
-          console.error("Unexpected response:", data);
+          setEmployeeDetails(data[0]); 
+          setViewDetails(true); 
         }
       })
       .catch((error) => {
         console.error("Error fetching employee details:", error);
       });
   };
-  
-  // Render employee list
+
+  const calculateTotalSalary = () => {
+    const { salary_basic, salary_da, salary_hra, salary_maintenance } = employeeDetails;
+    return parseFloat(salary_basic || 0) + parseFloat(salary_da || 0) + parseFloat(salary_hra || 0) + parseFloat(salary_maintenance || 0);
+  };
+
+  const handleSalaryChange = (e) => {
+    const { name, value } = e.target;
+    setSalaryDetails((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSalarySubmit = () => {
+    const updatedSalary = {
+      ...salaryDetails,
+      employee_id: employeeDetails.id
+    };
+
+    fetch("http://localhost/login-backend/updatesalary.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedSalary),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Salary updated successfully!");
+          setEmployeeDetails((prevDetails) => ({
+            ...prevDetails,
+            ...salaryDetails,
+          }));
+          setIsSalaryFormVisible(false);
+        } else {
+          alert("Failed to update salary.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating salary:", error);
+      });
+  };
+
   const employeeListItems = employees.map((employee) => (
     <li
       key={employee.id}
       onClick={() => {
-        console.log("Selected employee:", employee); // Log the employee being selected
         setSelectedEmployee(employee);
         fetchEmployeeDetails(employee.id);
       }}
@@ -92,6 +133,67 @@ const EmployeeList = () => {
               <p><strong>DA:</strong> {employeeDetails.salary_da}</p>
               <p><strong>HRA:</strong> {employeeDetails.salary_hra}</p>
               <p><strong>Maintenance Allowance:</strong> {employeeDetails.salary_maintenance}</p>
+
+              {/* Display Total Salary */}
+              <p><strong>Total Salary:</strong> ₹{calculateTotalSalary()}</p>
+
+              <button
+                onClick={() => setIsSalaryFormVisible(!isSalaryFormVisible)}
+                className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Set Salary
+              </button>
+
+              {isSalaryFormVisible && (
+                <div className="mt-4 p-4 bg-gray-100 rounded shadow">
+                  <div className="mb-2">
+                    <label className="block mb-1">Basic Salary:</label>
+                    <input
+                      type="number"
+                      name="salary_basic"
+                      value={salaryDetails.salary_basic}
+                      onChange={handleSalaryChange}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label className="block mb-1">DA:</label>
+                    <input
+                      type="number"
+                      name="salary_da"
+                      value={salaryDetails.salary_da}
+                      onChange={handleSalaryChange}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label className="block mb-1">HRA:</label>
+                    <input
+                      type="number"
+                      name="salary_hra"
+                      value={salaryDetails.salary_hra}
+                      onChange={handleSalaryChange}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label className="block mb-1">Maintenance Allowance:</label>
+                    <input
+                      type="number"
+                      name="salary_maintenance"
+                      value={salaryDetails.salary_maintenance}
+                      onChange={handleSalaryChange}
+                      className="w-full px-4 py-2 border rounded"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSalarySubmit}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Save Salary
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

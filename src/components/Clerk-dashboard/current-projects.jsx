@@ -27,28 +27,19 @@ const ProjectManagement = () => {
     }
   }, [selectedCompany]);
 
-  // Fetch assigned employees and project leader for a selected project
+  // Fetch employees from the `users` table and assigned employees for a selected project
   useEffect(() => {
     if (selectedProject) {
       fetch(`http://localhost/login-backend/fetch_assigned_employees.php?project_id=${selectedProject.id}`)
         .then((res) => res.json())
         .then((data) => {
           setProjectLeader(data.leader_id || "");
-          setAllocatedEmployees(data.allocated_employees || []);
+          setAllocatedEmployees(data.assigned_employees || []);
+          setEmployees(data.employees || []);
         })
         .catch((err) => console.error("Error fetching employees:", err));
     }
   }, [selectedProject]);
-
-  const handleAllocateEmployee = (id) => {
-    if (!allocatedEmployees.includes(id)) {
-      setAllocatedEmployees((prev) => [...prev, id]);
-    }
-  };
-
-  const handleDeallocateEmployee = (id) => {
-    setAllocatedEmployees((prev) => prev.filter((empId) => empId !== id));
-  };
 
   const handleSubmitProject = () => {
     const projectData = {
@@ -57,7 +48,7 @@ const ProjectManagement = () => {
       allocated_employees: allocatedEmployees,
     };
 
-    fetch("http://localhost/login-backend/update_project.php", {
+    fetch("http://localhost/login-backend/update_assigned_employees.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -110,7 +101,7 @@ const ProjectManagement = () => {
       ) : (
         <div>
           <h2 className="text-xl font-bold mb-4">Manage Project</h2>
-          <h3 className="text-lg font-bold mt-4">Project Leader</h3>
+          <h3 className="text-lg font-bold mt-4">Update Project Leader</h3>
           <select
             value={projectLeader}
             onChange={(e) => setProjectLeader(e.target.value)}
@@ -118,35 +109,33 @@ const ProjectManagement = () => {
           >
             <option value="">Select Leader</option>
             {employees.map((emp) => (
-              <option key={emp.id} value={emp.id}>
+              <option key={emp.employee_id} value={emp.employee_id}>
                 {emp.username}
               </option>
             ))}
           </select>
 
-          <h3 className="text-lg font-bold mt-4">Allocated Employees</h3>
-          <ul>
-            {employees.map((emp) => (
-              <li key={emp.id} className="flex items-center">
-                <span className="flex-1">{emp.username}</span>
-                {allocatedEmployees.includes(emp.id) ? (
-                  <button
-                    className="text-red-500 hover:underline"
-                    onClick={() => handleDeallocateEmployee(emp.id)}
-                  >
-                    Deallocate
-                  </button>
-                ) : (
-                  <button
-                    className="text-green-500 hover:underline"
-                    onClick={() => handleAllocateEmployee(emp.id)}
-                  >
-                    Allocate
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+          {employees.map((employee) => (
+  <div key={employee.employee_id} className="mb-2">
+    <label>
+      <input
+        type="checkbox"
+        value={employee.employee_id}
+        checked={allocatedEmployees.includes(Number(employee.employee_id))} // Ensure the employee_id is a number
+        onChange={(e) => {
+          const id = Number(employee.employee_id); // Ensure the id is a number
+          setAllocatedEmployees((prev) =>
+            e.target.checked
+              ? [...prev, id] // Add employee ID if checked
+              : prev.filter((empId) => empId !== id) // Remove if unchecked
+          );
+        }}
+      />
+      {employee.username}
+    </label>
+  </div>
+))}
+
 
           <button
             className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"

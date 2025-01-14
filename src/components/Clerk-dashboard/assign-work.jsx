@@ -56,9 +56,40 @@ const AssignWork = () => {
   };
 
   const handleProjectSelect = (project) => {
-    setSelectedProject(project);
-    setStep("employee"); // Navigate to employee step
+    // Ensure the project object has a client_id and project_name before sending the request
+    if (!selectedCompany || !project.project_name) {
+      alert("Missing company or project data");
+      return;
+    }
+  
+    // Check if the selected project is already assigned
+    fetch("http://localhost/login-backend/check_project.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: selectedCompany.id, // Ensure the company ID is sent
+        project_name: project.project_name, // Ensure the project name is sent
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "exists") {
+          // If the project is already assigned, show an alert
+          alert("This project is already assigned.");
+        } else {
+          // If the project is not assigned, proceed with the selection
+          setSelectedProject(project);
+          setStep("employee"); // Navigate to employee step
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking project assignment:", error);
+        alert("Failed to check project assignment. Please try again later.");
+      });
   };
+  
 
   const handleBack = () => {
     if (step === "employee") setStep("project");
@@ -72,7 +103,7 @@ const AssignWork = () => {
       project_leader: projectLeader,
       message: message,
     };
-  
+
     // Send the data to the PHP backend using fetch
     fetch("http://localhost/login-backend/assign_project.php", {
       method: "POST",
@@ -85,7 +116,7 @@ const AssignWork = () => {
       .then((result) => {
         if (result.success) {
           alert(`Project "${selectedProject.project_name}" assigned successfully!`);
-  
+
           // Reset states after successful assignment
           setStep("company");
           setSelectedCompany(null);
@@ -102,17 +133,12 @@ const AssignWork = () => {
         alert("Failed to assign project. Please try again later.");
       });
   };
-  
-  
 
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-4">
       <h3 className="text-xl font-semibold">Assign Work</h3>
       {step !== "company" && (
-        <button
-          onClick={handleBack}
-          className="text-blue-500 font-semibold mb-4"
-        >
+        <button onClick={handleBack} className="text-blue-500 font-semibold mb-4">
           ← Back
         </button>
       )}
@@ -153,61 +179,61 @@ const AssignWork = () => {
         </div>
       )}
 
-{step === "employee" && (
-  <div>
-    <h4 className="font-bold mb-4">Project: {selectedProject.project_name}</h4>
+      {step === "employee" && (
+        <div>
+          <h4 className="font-bold mb-4">Project: {selectedProject.project_name}</h4>
 
-    <label className="block mb-2">Select Employees:</label>
-    {employees.map((employee, index) => (
-      <div key={index} className="mb-2">
-        <label>
-          <input
-            type="checkbox"
-            value={employee.id} // Use employee.id as the value
-            onChange={(e) => {
-              const id = e.target.value; // This will now hold the employee's ID
-              setSelectedEmployees((prev) =>
-                e.target.checked
-                  ? [...prev, id] // Add employee ID to selectedEmployees
-                  : prev.filter((empId) => empId !== id) // Remove employee ID from selectedEmployees
-              );
-            }}
+          <label className="block mb-2">Select Employees:</label>
+          {employees.map((employee, index) => (
+            <div key={index} className="mb-2">
+              <label>
+                <input
+                  type="checkbox"
+                  value={employee.id}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedEmployees((prev) =>
+                      e.target.checked
+                        ? [...prev, id]
+                        : prev.filter((empId) => empId !== id)
+                    );
+                  }}
+                />
+                {employee.username}
+              </label>
+            </div>
+          ))}
+
+          <label className="block mb-2 mt-4">Select Project Leader:</label>
+          <select
+            className="border rounded w-full p-2"
+            value={projectLeader || ""}
+            onChange={(e) => setProjectLeader(e.target.value)}
+          >
+            <option value="">--Select Leader--</option>
+            {employees.map((employee, index) => (
+              <option key={index} value={employee.id}>
+                {employee.username}
+              </option>
+            ))}
+          </select>
+
+          <label className="block mb-2 mt-4">Message:</label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="border rounded w-full p-2"
+            rows="3"
           />
-          {employee.username} {/* Display username as label */}
-        </label>
-      </div>
-    ))}
 
-    <label className="block mb-2 mt-4">Select Project Leader:</label>
-    <select
-      className="border rounded w-full p-2"
-      value={projectLeader || ""} // The value will be the employee ID
-      onChange={(e) => setProjectLeader(e.target.value)} // Set the selected employee's ID
-    >
-      <option value="">--Select Leader--</option>
-      {employees.map((employee, index) => (
-        <option key={index} value={employee.id}> {/* Use employee.id as the value */}
-          {employee.username} {/* Display username in the dropdown */}
-        </option>
-      ))}
-    </select>
-
-    <label className="block mb-2 mt-4">Message:</label>
-    <textarea
-      value={message}
-      onChange={(e) => setMessage(e.target.value)}
-      className="border rounded w-full p-2"
-      rows="3"
-    />
-
-    <button
-      onClick={handleAssign}
-      className="bg-green-500 text-white px-4 py-2 rounded mt-4"
-    >
-      Assign Project
-    </button>
-  </div>
-)}
+          <button
+            onClick={handleAssign}
+            className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+          >
+            Assign Project
+          </button>
+        </div>
+      )}
     </div>
   );
 };

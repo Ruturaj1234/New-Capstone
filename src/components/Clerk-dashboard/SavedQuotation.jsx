@@ -57,7 +57,7 @@ const SavedQuotation = ({ clientId, clientName, projectId, onClose }) => {
       const data = await response.json();
       if (data.success) {
         const confirmAction = window.confirm(
-          "Quotation updated successfully! Do you want to view the updated list?"
+          "Quotation updated successfully!"
         );
         if (confirmAction) {
           onClose(); // Close the edit form or navigate to the updated list
