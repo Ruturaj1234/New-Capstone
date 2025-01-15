@@ -9,7 +9,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         try {
             const response = await fetch('http://localhost/login-backend/login.php', {
                 method: 'POST',
@@ -18,23 +18,25 @@ const Login = () => {
                 },
                 body: JSON.stringify({ username, password }),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Network response was not ok');
             }
-
+    
             const data = await response.json();
             setMessage(data.message);
-
-            // Redirect based on user role from SQL database
+    
+            // If login is successful, set the session and redirect based on role
             if (data.success) {
+                // Optionally, store role in sessionStorage or localStorage
+                sessionStorage.setItem('role', data.role);
                 switch (data.role) {
                     case 'owner':
                         navigate('/owner-dashboard');
                         break;
                     case 'employee':
-                        navigate('/Employee-dashboard');
+                        navigate('/employee-dashboard');
                         break;
                     case 'clerk':
                         navigate('/clerk-dashboard');
@@ -50,6 +52,7 @@ const Login = () => {
             console.error('Error:', error);
         }
     };
+    
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-orange-300 to-orange-500">
