@@ -61,7 +61,7 @@ const AssignWork = () => {
       alert("Missing company or project data");
       return;
     }
-  
+
     // Check if the selected project is already assigned
     fetch("http://localhost/login-backend/check_project.php", {
       method: "POST",
@@ -89,7 +89,6 @@ const AssignWork = () => {
         alert("Failed to check project assignment. Please try again later.");
       });
   };
-  
 
   const handleBack = () => {
     if (step === "employee") setStep("project");
@@ -135,44 +134,58 @@ const AssignWork = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <h3 className="text-xl font-semibold">Assign Work</h3>
+    <div className="bg-white rounded-lg shadow-lg p-8 w-full mx-auto">
+      <h3 className="text-2xl font-bold text-gray-800 mb-8">Assign Work</h3>
       {step !== "company" && (
-        <button onClick={handleBack} className="text-blue-500 font-semibold mb-4">
+        <button
+          onClick={handleBack}
+          className="font-semibold mb-6 transition-colors duration-200"
+        >
           ← Back
         </button>
       )}
 
       {step === "company" && (
         <div>
-          <label className="block mb-2">Select Company:</label>
-          {companies.map((company) => (
-            <div key={company.id} className="mb-4">
-              <h4
-                className="font-bold cursor-pointer"
+          <label className="block text-sm font-medium text-gray-700 mb-4">
+            Select Company:
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {companies.map((company) => (
+              <div
+                key={company.id}
                 onClick={() => handleCompanySelect(company)}
+                className="bg-gray-50 p-6 rounded-lg shadow-sm cursor-pointer hover:bg-gray-100 transition-all duration-200"
               >
-                {company.client_name}
-              </h4>
-            </div>
-          ))}
+                <h4 className="font-semibold text-gray-800 text-center">
+                  {company.client_name}
+                </h4>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {step === "project" && (
         <div>
-          <h4 className="font-bold mb-4">Company: {selectedCompany.client_name}</h4>
-          <label className="block mb-2">Select Project:</label>
+          <h4 className="text-xl font-semibold text-gray-800 mb-6">
+            Company: {selectedCompany.client_name}
+          </h4>
+          <label className="block text-sm font-medium text-gray-700 mb-4">
+            Select Project:
+          </label>
           {projects.length > 0 ? (
-            projects.map((project) => (
-              <button
-                key={project.id}
-                onClick={() => handleProjectSelect(project)}
-                className="bg-blue-500 text-white px-4 py-2 rounded mr-2 mb-2"
-              >
-                {project.project_name}
-              </button>
-            ))
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {projects.map((project) => (
+                <button
+                  key={project.id}
+                  onClick={() => handleProjectSelect(project)}
+                  className="bg-gray-50 px-6 py-3 rounded-lg transition-all hover:bg-gray-100 duration-200 font-semibold text-gray-800"
+                >
+                  {project.project_name}
+                </button>
+              ))}
+            </div>
           ) : (
             <p className="text-red-500">{noProjectsMessage}</p>
           )}
@@ -181,54 +194,69 @@ const AssignWork = () => {
 
       {step === "employee" && (
         <div>
-          <h4 className="font-bold mb-4">Project: {selectedProject.project_name}</h4>
+          <h4 className="text-xl font-semibold text-gray-800 mb-6">
+            Project: {selectedProject.project_name}
+          </h4>
 
-          <label className="block mb-2">Select Employees:</label>
-          {employees.map((employee, index) => (
-            <div key={index} className="mb-2">
-              <label>
-                <input
-                  type="checkbox"
-                  value={employee.id}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setSelectedEmployees((prev) =>
-                      e.target.checked
-                        ? [...prev, id]
-                        : prev.filter((empId) => empId !== id)
-                    );
-                  }}
-                />
-                {employee.username}
-              </label>
+          <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-4">
+              Select Employees:
+            </label>
+            <div className="space-y-3">
+              {employees.map((employee, index) => (
+                <div key={index} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={employee.id}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedEmployees((prev) =>
+                        e.target.checked
+                          ? [...prev, id]
+                          : prev.filter((empId) => empId !== id)
+                      );
+                    }}
+                    className="mr-2 h-5 w-5 text-blue-500 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-gray-800">{employee.username}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
 
-          <label className="block mb-2 mt-4">Select Project Leader:</label>
-          <select
-            className="border rounded w-full p-2"
-            value={projectLeader || ""}
-            onChange={(e) => setProjectLeader(e.target.value)}
-          >
-            <option value="">--Select Leader--</option>
-            {employees.map((employee, index) => (
-              <option key={index} value={employee.id}>
-                {employee.username}
-              </option>
-            ))}
-          </select>
+          <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Project Leader:
+            </label>
+            <select
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              value={projectLeader || ""}
+              onChange={(e) => setProjectLeader(e.target.value)}
+            >
+              <option value="">--Select Leader--</option>
+              {employees.map((employee, index) => (
+                <option key={index} value={employee.id}>
+                  {employee.username}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <label className="block mb-2 mt-4">Message:</label>
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="border rounded w-full p-2"
-            rows="3"
-          />
+          <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Message:
+            </label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              rows="3"
+            />
+          </div>
 
           <button
             onClick={handleAssign}
-            className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-200"
           >
             Assign Project
           </button>

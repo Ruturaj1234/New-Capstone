@@ -10,9 +10,10 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import Sidebar from "./Sidebar";
+import Sidebar from "../Sidebar";
+import { FaBars } from "react-icons/fa";
 
-const OwnerDashboard = () => {
+const ManageUser = () => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeView, setActiveView] = useState(null); // 'employees' or 'clerks'
@@ -188,12 +189,31 @@ const OwnerDashboard = () => {
 
         {/* Main Content */}
         <main className="flex-1">
+          {/* Header */}
+        <header className="bg-white p-4 shadow-md flex items-center justify-between">
+          {/* Logo and Title */}
+          <div className="flex items-center">
+            <img
+              src="https://www.saisamarthpolytech.com/images/logo.png"
+              alt="Sai Samarth Polytech"
+              className="h-10 w-auto mr-4"
+            />
+          </div>
+
+          {/* Hamburger Menu (Mobile Only) */}
+          <button
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
+          >
+            <FaBars size={24} />
+          </button>
+        </header>
           <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
             {/* Header */}
             <header>
               <h1 className="text-3xl font-bold mb-4">Owner Dashboard</h1>
               <p className="text-gray-600">
-                Manage employees and clerks effectively with this dashboard.
+                Welcome to the management dashboard. Here you can efficiently manage users, including employees and clerks, to ensure smooth operations within the company.
               </p>
             </header>
 
@@ -225,7 +245,7 @@ const OwnerDashboard = () => {
               </div>
             </div>
 
-            
+
             {/* View Toggles */}
             <div className="flex gap-4">
               <button
@@ -259,79 +279,92 @@ const OwnerDashboard = () => {
             )}
 
             {/* Form */}
-            {isFormVisible && (
-              <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 space-y-6">
-                <header className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold">
-                    {editingUser ? "Edit User" : "Generate New Credentials"}
-                  </h2>
-                  <button
-                    onClick={() => setEditingUser(null)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </header>
+            <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 space-y-6">
+              <header className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">
+                  {editingUser ? "Edit User" : "Generate New Credentials"}
+                </h2>
+                <button
+                  onClick={() => setEditingUser(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </header>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.username}
-                      onChange={(e) =>
-                        setFormData({ ...formData, username: e.target.value })
-                      }
-                      className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
-                      className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Role
-                    </label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) =>
-                        setFormData({ ...formData, role: e.target.value })
-                      }
-                      className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                      required
-                    >
-                      <option value="">Select role</option>
-                      {roles.map((role) => (
-                        <option key={role.value} value={role.value}>
-                          {role.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-orange-600 text-white rounded-lg py-3 font-medium hover:bg-orange-700 transition"
-                    disabled={isLoading}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) =>
+                      setFormData({ ...formData, username: e.target.value })
+                    }
+                    className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Role
+                  </label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) =>
+                      setFormData({ ...formData, role: e.target.value })
+                    }
+                    className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    required
                   >
-                    {isLoading ? "Processing..." : "Generate Credentials"}
-                  </button>
-                </form>
-              </div>
-            )}
+                    <option value="">Select a role</option>
+                    {roles.map((role) => (
+                      <option key={role.value} value={role.value}>
+                        {role.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {message.content && (
+                  <div
+                    className={`${
+                      message.type === "error" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+                    } px-4 py-2 rounded-lg`}
+                  >
+                    {message.content}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className={`w-full py-2 text-white font-semibold rounded-lg ${
+                    isLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-orange-600 hover:bg-orange-700"
+                  }`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Processing..." : "Submit"}
+                </button>
+              </form>
+            </div>
           </div>
         </main>
       </div>
@@ -339,4 +372,4 @@ const OwnerDashboard = () => {
   );
 };
 
-export default OwnerDashboard;
+export default ManageUser;

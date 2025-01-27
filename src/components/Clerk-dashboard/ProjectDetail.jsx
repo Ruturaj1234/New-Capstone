@@ -7,6 +7,7 @@ import GenerateQuotation from "./GenerateQuotation";
 import SavedQuotation from "./SavedQuotation";
 import GenerateBill from "./GenerateBill";
 import Media from "./Media";
+import Sidebar from "./Sidebar";
 
 const ProjectDetail = () => {
   const { clientId, projectId } = useParams();
@@ -14,9 +15,9 @@ const ProjectDetail = () => {
 
   const [projectName, setProjectName] = useState(""); // State for project name
   const [activeForm, setActiveForm] = useState(null); // 'quotation', 'bill', 'media'
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch project name from the backend
     const fetchProjectName = async () => {
       try {
         const response = await fetch(
@@ -24,7 +25,7 @@ const ProjectDetail = () => {
         );
         const data = await response.json();
         if (data.success) {
-          setProjectName(data.project_name); // Set the project name
+          setProjectName(data.project_name);
         } else {
           alert("Failed to fetch project name: " + data.message);
         }
@@ -45,103 +46,151 @@ const ProjectDetail = () => {
   };
 
   return (
-    <div className="flex flex-col items-center bg-gray-100 p-6 min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl">
-        <header className="flex items-center mb-4">
-          <button onClick={handleBack} className="text-gray-700">
-            <FaArrowLeft size={24} />
-          </button>
-          <h2 className="text-2xl font-bold mx-auto">Project Details</h2>
-          <img
-            src="https://www.saisamarthpolytech.com/images/logo.png"
-            alt="Logo"
-            className="h-10 w-auto ml-4"
-          />
-        </header>
+    <div className="flex h-full bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
 
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold">
-            Project Name: <span className="text-gray-600">{projectName}</span>
-          </h3>
-          <h4 className="text-lg text-gray-500">Client ID: {clientId}</h4>
+      {/* Main Content */}
+      <div className="flex flex-col items-center bg-gray-50 p-6 min-h-screen w-full">
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-200 w-full max-w-4xl">
+          {/* Header */}
+          <div className="border-b border-gray-200 p-6 md:p-8">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={handleBack}
+                className="text-gray-600 hover:text-gray-800 transition duration-300"
+              >
+                <FaArrowLeft size={24} />
+              </button>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 text-center">
+                Project Details
+              </h2>
+              <img
+                src="https://www.saisamarthpolytech.com/images/logo.png"
+                alt="Logo"
+                className="h-12 w-auto"
+              />
+            </div>
+          </div>
+
+          {/* Project Info */}
+          <div className="p-6 md:p-8">
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold text-gray-700">
+                Project Name:{" "}
+                <span className="text-gray-500 font-medium">{projectName}</span>
+              </h3>
+              <h4 className="text-lg text-gray-400">Client ID: {clientId}</h4>
+            </div>
+
+            {/* Actions Section */}
+            <h4 className="text-xl font-semibold text-gray-800 mb-4">
+              Actions
+            </h4>
+            <div className="flex flex-col gap-4">
+              {/* Generate Quotation */}
+              <button
+                onClick={() => toggleForm("quotation")}
+                className="flex items-center gap-4 p-4 md:p-6 rounded-xl border border-gray-300 hover:shadow-lg hover:border-green-500 hover:bg-green-50 transition-all group"
+              >
+                <div className="p-4 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                  <FaFileInvoiceDollar className="w-8 h-8 text-green-600" />
+                </div>
+                <div className="flex-grow text-left">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Generate Quotation
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Create a new project quotation.
+                  </p>
+                </div>
+              </button>
+              {activeForm === "quotation" && (
+                <GenerateQuotation
+                  clientId={clientId}
+                  projectId={projectId}
+                  onClose={() => setActiveForm(null)}
+                />
+              )}
+
+              {/* Saved Quotations */}
+              <button
+                onClick={() => toggleForm("SavedQuotation")}
+                className="flex items-center gap-4 p-4 md:p-6 rounded-xl border border-gray-300 hover:shadow-lg hover:border-yellow-500 hover:bg-yellow-50 transition-all group"
+              >
+                <div className="p-4 bg-yellow-100 rounded-lg group-hover:bg-yellow-200 transition-colors">
+                  <FaFileInvoiceDollar className="w-8 h-8 text-yellow-600" />
+                </div>
+                <div className="flex-grow text-left">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Saved Quotations
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    View or edit saved quotations.
+                  </p>
+                </div>
+              </button>
+              {activeForm === "SavedQuotation" && (
+                <SavedQuotation
+                  clientId={clientId}
+                  projectId={projectId}
+                  onClose={() => setActiveForm(null)}
+                />
+              )}
+
+              {/* Generate Bill */}
+              <button
+                onClick={() => toggleForm("bill")}
+                className="flex items-center gap-4 p-4 md:p-6 rounded-xl border border-gray-300 hover:shadow-lg hover:border-blue-500 hover:bg-blue-50 transition-all group"
+              >
+                <div className="p-4 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                  <FaFileInvoiceDollar className="w-8 h-8 text-blue-600" />
+                </div>
+                <div className="flex-grow text-left">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Generate Bill
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Create a bill for this project.
+                  </p>
+                </div>
+              </button>
+              {activeForm === "bill" && (
+                <GenerateBill
+                  clientId={clientId}
+                  projectId={projectId}
+                  onClose={() => setActiveForm(null)}
+                />
+              )}
+
+              {/* Media */}
+              <button
+                onClick={() => toggleForm("media")}
+                className="flex items-center gap-4 p-4 md:p-6 rounded-xl border border-gray-300 hover:shadow-lg hover:border-purple-500 hover:bg-purple-50 transition-all group"
+              >
+                <div className="p-4 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                  <FaUpload className="w-8 h-8 text-purple-600" />
+                </div>
+                <div className="flex-grow text-left">
+                  <h3 className="text-lg font-semibold text-gray-900">Media</h3>
+                  <p className="text-sm text-gray-500">
+                    Upload or view media files.
+                  </p>
+                </div>
+              </button>
+              {activeForm === "media" && (
+                <Media
+                  clientId={clientId}
+                  projectId={projectId}
+                  onClose={() => setActiveForm(null)}
+                />
+              )}
+            </div>
+          </div>
         </div>
-
-        <div className="flex flex-col space-y-4 mb-4">
-          <h4 className="text-lg font-semibold">Actions</h4>
-          {/* Generate Quotation Button */}
-          <div className="flex flex-col">
-            <button
-              onClick={() => toggleForm("quotation")}
-              className="bg-green-600 text-white px-4 py-2 rounded flex items-center transition duration-300 hover:bg-green-700"
-            >
-              <FaFileInvoiceDollar className="mr-2" />
-              Generate Quotation
-            </button>
-            {activeForm === "quotation" && (
-              <GenerateQuotation
-                clientId={clientId}
-                projectId={projectId}
-                onClose={() => setActiveForm(null)}
-              />
-            )}
-          </div>
-          
-           {/* Generate Bill Button */}
-           <div className="flex flex-col">
-            <button
-              onClick={() => toggleForm("SavedQuotation")}
-              className="bg-yellow-600 text-white px-4 py-2 rounded flex items-center transition duration-300 hover:bg-yellow-700"
-            >
-              <FaFileInvoiceDollar className="mr-2" />
-              Saved Quotations
-            </button>
-            {activeForm === "SavedQuotation" && (
-              <SavedQuotation
-                clientId={clientId}
-                projectId={projectId}
-                onClose={() => setActiveForm(null)}
-              />
-            )}
-          </div>
-
-          {/* Generate Bill Button */}
-          <div className="flex flex-col">
-            <button
-              onClick={() => toggleForm("bill")}
-              className="bg-blue-600 text-white px-4 py-2 rounded flex items-center transition duration-300 hover:bg-blue-700"
-            >
-              <FaFileInvoiceDollar className="mr-2" />
-              Generate Bill
-            </button>
-            {activeForm === "bill" && (
-              <GenerateBill
-                clientId={clientId}
-                projectId={projectId}
-                onClose={() => setActiveForm(null)}
-              />
-            )}
-          </div>
-
-          {/* Media Button */}
-          <div className="flex flex-col">
-            <button
-              onClick={() => toggleForm("media")}
-              className="bg-purple-600 text-white px-4 py-2 rounded flex items-center transition duration-300 hover:bg-purple-700"
-            >
-              <FaUpload className="mr-2" />
-              Media
-            </button>
-            {activeForm === "media" && (
-              <Media
-                clientId={clientId}
-                projectId={projectId}
-                onClose={() => setActiveForm(null)}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Additional Project Details can be added here */}
       </div>
     </div>
   );

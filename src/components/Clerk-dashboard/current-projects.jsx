@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { FaArrowLeft } from "react-icons/fa"; // Import the back arrow icon
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProjectManagement = () => {
   const [companies, setCompanies] = useState([]);
@@ -9,12 +12,20 @@ const ProjectManagement = () => {
   const [allocatedEmployees, setAllocatedEmployees] = useState([]);
   const [employees, setEmployees] = useState([]);
 
+  // Test toast on component mount
+  useEffect(() => {
+    toast.success("Component mounted!"); // Test toast
+  }, []);
+
   // Fetch assigned companies
   useEffect(() => {
     fetch("http://localhost/login-backend/get_assigned_companies.php")
       .then((res) => res.json())
       .then((data) => setCompanies(data))
-      .catch((err) => console.error("Error fetching companies:", err));
+      .catch((err) => {
+        console.error("Error fetching companies:", err);
+        toast.error("Failed to fetch companies. Please try again."); // Error toast
+      });
   }, []);
 
   // Fetch projects assigned to a selected company
@@ -23,7 +34,10 @@ const ProjectManagement = () => {
       fetch(`http://localhost/login-backend/fetch_assigned_projects.php?client_id=${selectedCompany.id}`)
         .then((res) => res.json())
         .then((data) => setProjects(data.projects || []))
-        .catch((err) => console.error("Error fetching projects:", err));
+        .catch((err) => {
+          console.error("Error fetching projects:", err);
+          toast.error("Failed to fetch projects. Please try again."); // Error toast
+        });
     }
   }, [selectedCompany]);
 
@@ -37,7 +51,10 @@ const ProjectManagement = () => {
           setAllocatedEmployees(data.assigned_employees || []);
           setEmployees(data.employees || []);
         })
-        .catch((err) => console.error("Error fetching employees:", err));
+        .catch((err) => {
+          console.error("Error fetching employees:", err);
+          toast.error("Failed to fetch employees. Please try again."); // Error toast
+        });
     }
   }, [selectedProject]);
 
@@ -58,45 +75,70 @@ const ProjectManagement = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          alert("Project updated successfully!");
+          toast.success("Project updated successfully!"); // Success toast
         } else {
-          alert("Failed to update project.");
+          toast.error("Failed to update project."); // Error toast
         }
       })
-      .catch((err) => console.error("Error updating project:", err));
+      .catch((err) => {
+        console.error("Error updating project:", err);
+        toast.error("Error updating project. Please try again."); // Error toast
+      });
   };
 
   return (
     <div className="p-4">
+      {/* Back Navigation for Projects Section */}
+      {selectedCompany && !selectedProject && (
+        <button
+          onClick={() => setSelectedCompany(null)} // Go back to companies
+          className="flex items-center text-gray-700 hover:text-gray-900 mb-4"
+        >
+          <FaArrowLeft className="mr-2" /> Back to Companies
+        </button>
+      )}
+
+      {/* Back Navigation for Manage Project Section */}
+      {selectedProject && (
+        <button
+          onClick={() => setSelectedProject(null)} // Go back to projects
+          className="flex items-center text-gray-700 hover:text-gray-900 mb-4"
+        >
+          <FaArrowLeft className="mr-2" /> Back to Projects
+        </button>
+      )}
+
       {!selectedCompany ? (
         <div>
           <h2 className="text-xl font-bold mb-4">Select a Company</h2>
-          <ul>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {companies.map((company) => (
-              <li
+              <div
                 key={company.id}
-                className="cursor-pointer text-blue-600 hover:underline"
+                className="cursor-pointer bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                 onClick={() => setSelectedCompany(company)}
               >
-                {company.client_name}
-              </li>
+                <h3 className="text-lg font-semibold text-gray-800">{company.client_name}</h3>
+                <p className="text-sm text-gray-500">ID: {company.id}</p>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       ) : !selectedProject ? (
         <div>
           <h2 className="text-xl font-bold mb-4">Select a Project</h2>
-          <ul>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {projects.map((project) => (
-              <li
+              <div
                 key={project.id}
-                className="cursor-pointer text-blue-600 hover:underline"
+                className="cursor-pointer bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                 onClick={() => setSelectedProject(project)}
               >
-                {project.project_name}
-              </li>
+                <h3 className="text-lg font-semibold text-gray-800">{project.project_name}</h3>
+                <p className="text-sm text-gray-500">ID: {project.id}</p>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       ) : (
         <div>
@@ -116,26 +158,25 @@ const ProjectManagement = () => {
           </select>
 
           {employees.map((employee) => (
-  <div key={employee.employee_id} className="mb-2">
-    <label>
-      <input
-        type="checkbox"
-        value={employee.employee_id}
-        checked={allocatedEmployees.includes(Number(employee.employee_id))} // Ensure the employee_id is a number
-        onChange={(e) => {
-          const id = Number(employee.employee_id); // Ensure the id is a number
-          setAllocatedEmployees((prev) =>
-            e.target.checked
-              ? [...prev, id] // Add employee ID if checked
-              : prev.filter((empId) => empId !== id) // Remove if unchecked
-          );
-        }}
-      />
-      {employee.username}
-    </label>
-  </div>
-))}
-
+            <div key={employee.employee_id} className="mb-2">
+              <label>
+                <input
+                  type="checkbox"
+                  value={employee.employee_id}
+                  checked={allocatedEmployees.includes(Number(employee.employee_id))}
+                  onChange={(e) => {
+                    const id = Number(employee.employee_id);
+                    setAllocatedEmployees((prev) =>
+                      e.target.checked
+                        ? [...prev, id] // Add employee ID if checked
+                        : prev.filter((empId) => empId !== id) // Remove if unchecked
+                    );
+                  }}
+                />
+                {employee.username}
+              </label>
+            </div>
+          ))}
 
           <button
             className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
@@ -145,6 +186,19 @@ const ProjectManagement = () => {
           </button>
         </div>
       )}
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

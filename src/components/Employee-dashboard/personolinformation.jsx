@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable no-unused-vars */
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaBars, FaUserAlt, FaRegBuilding } from "react-icons/fa";
 import Sidebar from "./Sidebar";
@@ -7,39 +8,23 @@ const PersonalInformation = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("personal");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    // Fetch user information
-    fetch("http://localhost/login-backend/get_user_info.php")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          setUserInfo(data.user);
-        } else {
-          setError(data.message || "Failed to fetch user information");
-        }
-      })
-      .catch((error) => {
-        setError("An error occurred while fetching user information");
-      });
-  }, []);
 
   const handleBackClick = () => {
     navigate(-1);
   };
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
-
-  if (!userInfo) {
-    return <div>Loading...</div>;
-  }
+  const personalInfo = {
+    name: "John Doe",
+    age: "23",
+    address: "1234 Elm Street, Springfield, USA",
+    mobileNumber: "+1 (555) 123-4567",
+    accountNumber: "123456789012",
+    ifscCode: "ABC123456",
+    email: "johndoe@example.com"
+  };
 
   return (
-    <div className="flex h-full bg-gray-50">
+    <div className="flex h-full bg-gray-50 font-sans">
       {/* Sidebar */}
       <Sidebar
         isOpen={isMobileMenuOpen}
@@ -67,21 +52,19 @@ const PersonalInformation = () => {
 
         {/* Welcome Message */}
         <section className="bg-white p-8 shadow-lg rounded-xl mx-6 my-4">
-          <h1 className="text-3xl font-semibold text-gray-800">
-            Hello {userInfo.username}!
-          </h1>
+          <h1 className="text-3xl font-semibold text-gray-800">Welcome, {personalInfo.name}!</h1>
           <p className="text-lg text-gray-600">We're excited to have you as part of the team.</p>
         </section>
 
         {/* Profile Header Section */}
         <section className="bg-white p-8 shadow-lg rounded-xl mx-6 my-4 flex items-center space-x-6">
           <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center text-white text-4xl font-semibold cursor-pointer">
-            {userInfo.username.charAt(0)}
+            {personalInfo.name.charAt(0)}
           </div>
           <div>
-            <h2 className="text-3xl font-semibold text-gray-800">Hello {userInfo.username}</h2>
+            <h2 className="text-3xl font-semibold text-gray-800">{personalInfo.name}</h2>
             <p className="text-lg text-gray-600">Employee Profile</p>
-            <p className="text-md text-gray-500">{userInfo.email}</p>
+            <p className="text-md text-gray-500">{personalInfo.email}</p>
           </div>
         </section>
 
@@ -121,16 +104,16 @@ const PersonalInformation = () => {
                   <h2 className="text-2xl font-semibold text-gray-800 mb-6">Personal Details</h2>
                   <div className="space-y-4">
                     <p className="text-lg text-gray-700">
-                      <strong className="font-semibold text-gray-900">Name:</strong> {userInfo.username}
+                      <strong className="font-semibold text-gray-900">Name:</strong> {personalInfo.name}
                     </p>
                     <p className="text-lg text-gray-700">
-                      <strong className="font-semibold text-gray-900">Age:</strong> {userInfo.age}
+                      <strong className="font-semibold text-gray-900">Age:</strong> {personalInfo.age}
                     </p>
                     <p className="text-lg text-gray-700">
-                      <strong className="font-semibold text-gray-900">Address:</strong> {userInfo.address}
+                      <strong className="font-semibold text-gray-900">Address:</strong> {personalInfo.address}
                     </p>
                     <p className="text-lg text-gray-700">
-                      <strong className="font-semibold text-gray-900">Mobile Number:</strong> {userInfo.mobile_number}
+                      <strong className="font-semibold text-gray-900">Mobile Number:</strong> {personalInfo.mobileNumber}
                     </p>
                   </div>
                 </div>
@@ -139,10 +122,10 @@ const PersonalInformation = () => {
                   <h2 className="text-2xl font-semibold text-gray-800 mb-6">Bank Details</h2>
                   <div className="space-y-4">
                     <p className="text-lg text-gray-700">
-                      <strong className="font-semibold text-gray-900">Account Number:</strong> {userInfo.account_number}
+                      <strong className="font-semibold text-gray-900">Account Number:</strong> {personalInfo.accountNumber}
                     </p>
                     <p className="text-lg text-gray-700">
-                      <strong className="font-semibold text-gray-900">IFSC Code:</strong> {userInfo.ifsc_code}
+                      <strong className="font-semibold text-gray-900">IFSC Code:</strong> {personalInfo.ifscCode}
                     </p>
                   </div>
                 </div>

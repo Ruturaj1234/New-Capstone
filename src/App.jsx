@@ -1,3 +1,5 @@
+// src/App.jsx
+
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -16,17 +18,22 @@ import GenerateBill from "./components/Clerk-dashboard/GenerateBill";
 import Media from "./components/Clerk-dashboard/Media";
 import QuotationsList from "./components/Clerk-dashboard/QuotationsList";
 import ViewQuotation from "./components/Clerk-dashboard/ViewQuotation";
-import  EmployeeManagement from "./components/Clerk-dashboard/employee-management";
+import EmployeeManagement from "./components/Clerk-dashboard/employee-management";
 import Requests from "./components/Clerk-dashboard/requests";
 import AssignWork from "./components/Clerk-dashboard/assign-work";
 import EmployeeList from "./components/Clerk-dashboard/employee-list";
-import EmployeeDashboard from "./components/Employee-dashboard/Employee-dashboard"
-import Sidebar from "./components/Employee-dashboard/Sidebar"
-import PersonolInformation from "./components/Employee-dashboard/personolinformation"
-import AssignedProject from "./components/Employee-dashboard/assignedproect"
-import LeaveSallary from "./components/Employee-dashboard/leavesallary"
-import CurrentProject from "./components/Clerk-dashboard/current-projects"
-
+import EmployeeDashboard from "./components/Employee-dashboard/Employee-dashboard";
+import Sidebar from "./components/Employee-dashboard/Sidebar";
+import PersonolInformation from "./components/Employee-dashboard/personolinformation";
+import AssignedProject from "./components/Employee-dashboard/assignedproect";
+import LeaveSallary from "./components/Employee-dashboard/leavesallary";
+import Company from "./components/Owner-dashboard/clientmanagement/company";
+import Quotationlist from "./components/Owner-dashboard/clientmanagement/quotationlist";
+import QuotationInfo from "./components/Owner-dashboard/clientmanagement/quotationinfo";
+import User from "./components/Owner-dashboard/manageuser/User";
+import ManageUser from "./components/Owner-dashboard/manageuser/User";
+import Revenuemanagement from "./components/Owner-dashboard/revenue/Revenuemanagement";
+import DummyQuotation from "./components/Clerk-dashboard/DummyQuotation";
 
 const App = () => {
   return (
@@ -35,11 +42,19 @@ const App = () => {
         <Route path="/" element={<Navigate to="/login" />} />{" "}
         {/* Redirect root to /login */}
         <Route path="/login" element={<Login />} />
+
         <Route path="/owner-dashboard" element={<OwnerDashboard />} />
+        <Route path="/company" element={<Company/>} />
+        <Route path="/list" element={<Quotationlist />} />
+        <Route path="/info" element={<QuotationInfo />} />
+        <Route path="/manageuser" element={<ManageUser />} />
+        <Route path="/revenue" element={<Revenuemanagement/>}/>
+
+        <Route path="/dummy-quotation" element={<DummyQuotation/>}/>
         <Route path="/clerk-dashboard" element={<ClerkDashboard />} />
         {/* Add more routes as needed */}
         <Route path="/Employee-dashboard" element={<EmployeeDashboard />} />
-        <Route path="/sidebar" element={<Sidebar/>} />
+        <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/client-management" element={<ClientManagement />} />
         <Route path="/projects/:clientId" element={<ProjectManagement />} />
         <Route
@@ -61,14 +76,12 @@ const App = () => {
         <Route path="/quotations" element={<QuotationsList />} />
         <Route path="/view-quotation/:id" element={<ViewQuotation />} />
         <Route path="/employee-management" element={<EmployeeManagement />} />
-
         <Route path="/employee-list" element={<EmployeeList />} />
         <Route path="/assign-work" element={<AssignWork />} />
         <Route path="/requests" element={<Requests />} />
         <Route path="/personolinformation" element={<PersonolInformation />} />
         <Route path="/assignedproject" element={<AssignedProject />} />
         <Route path="/leavesalary" element={<LeaveSallary />} />
-        <Route path="/current-project" element={<CurrentProject />} />
       </Routes>
     </Router>
   );
