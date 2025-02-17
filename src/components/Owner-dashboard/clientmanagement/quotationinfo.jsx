@@ -1,6 +1,6 @@
-/* eslint-disable no-unused-vars */
-import React, { useState } from "react";
-import Sidebar from "../Sidebar"; // Ensure Sidebar component is imported correctly
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import Sidebar from "../Sidebar";
 import {
   FileText,
   Receipt,
@@ -8,13 +8,18 @@ import {
   Download,
   Calendar,
   Clock,
-  ArrowLeft, // Import the ArrowLeft icon for the back button
+  ArrowLeft,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const QuotationInfo = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [projectData, setProjectData] = useState(null);
+  const { company, projectId } = useParams();
+  console.log(company, projectId); // Check if these values are being correctly received
+
+  const navigate = useNavigate();
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -27,33 +32,157 @@ const QuotationInfo = () => {
     minute: "2-digit",
   });
 
+  useEffect(() => {
+    console.log("Project ID:", projectId); // Ensure it's available here
+    if (projectId) {
+      fetch(
+        `http://localhost/login-backend/Owner-management/getProject.php?id=${projectId}`
+      )
+        .then((response) => response.json())
+        .then((data) => setProjectData(data))
+        .catch((error) => console.error("Error fetching project:", error));
+    } else {
+      console.log("No projectId available");
+    }
+  }, [projectId]);
+
   const handleDownload = (type) => {
-    console.log(`Downloading ${type}`);
+    if (type === "quotation") {
+      if (!projectData) {
+        alert("Project data not available.");
+        return;
+      }
+
+      fetch(
+        `http://localhost/login-backend/get_saved_quotations_by_names.php?client_name=${company}&project_name=${projectData.project_name}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (!data.success) {
+            alert(data.message || "Error fetching quotation data.");
+            return;
+          }
+
+          const quotation = data.quotations[0];
+          if (!quotation) {
+            alert("Quotation not found.");
+            return;
+          }
+
+          generateQuotationPDF(quotation, company, projectData);
+        })
+        .catch((error) => {
+          console.error("Error fetching quotation:", error);
+          alert("An error occurred while generating the quotation PDF.");
+        });
+    } else {
+      console.log(`Downloading ${type}`);
+    }
   };
 
-  const handleBack = () => {
-    navigate(-1); // Navigate to the previous page
+  const generateQuotationPDF = (quotation, company, projectData) => {
+    const doc = new jsPDF();
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text("SaiSamarth Polytech Pvt. Ltd.", 15, 15);
+    doc.setFontSize(14);
+    doc.text(`Quotation for ${projectData.project_name}`, 15, 25);
+
+    // Quotation Details Table
+    doc.autoTable({
+      startY: 35,
+      head: [["Client Name", "Project Name", "Date"]],
+      body: [
+        [company, projectData.project_name, new Date().toLocaleDateString()],
+      ],
+      theme: "grid",
+      styles: { fontSize: 12, halign: "left" },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
+      bodyStyles: { lineWidth: 0.5 },
+    });
+
+    // Quotation Items Table
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 10,
+      head: [["Item No.", "Description", "Quantity", "Unit", "Rate", "Amount"]],
+      body: quotation.items.map((item, index) => [
+        index + 1,
+        item.description,
+        item.quantity,
+        item.unit,
+        Number(item.rate).toFixed(2),
+        Number(item.amount).toFixed(2),
+      ]),
+      theme: "grid",
+      styles: { fontSize: 12, halign: "center" },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
+      bodyStyles: { lineWidth: 0.5 },
+    });
+
+    // Summary
+    const taxableValue = quotation.items.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    );
+    const igst = taxableValue * 0.18;
+    const grandTotal = taxableValue + igst;
+
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 10,
+      head: [["Summary", "Amount"]],
+      body: [
+        ["Taxable Value", `${taxableValue.toFixed(2)}`],
+        ["IGST (18%)", `${igst.toFixed(2)}`],
+        ["Grand Total", `${grandTotal.toFixed(2)}`],
+      ],
+      theme: "grid",
+      styles: { fontSize: 12, halign: "left" },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
+      bodyStyles: { lineWidth: 0.5 },
+    });
+
+    // Footer
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 20,
+      body: [
+        ["Subject to Mumbai Jurisdiction", "For SaiSamarth Polytech Pvt. Ltd."],
+        ["", "Director"],
+      ],
+      theme: "grid",
+      styles: { fontSize: 12, halign: "left" },
+      bodyStyles: { lineWidth: 0.5 },
+    });
+    doc.save(`Quotation_${projectData.project_name}.pdf`);
   };
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Sidebar */}
       <Sidebar
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
-      {/* Main Content */}
       <main className="flex-1 p-6 lg:p-8 overflow-auto">
-        {/* Back Button */}
         <button
-          onClick={handleBack}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-6 focus:outline-none"
         >
-          <ArrowLeft className="w-6 h-6" /> {/* Back icon */}
+          <ArrowLeft className="w-6 h-6" />
           <span className="text-lg font-medium">Back</span>
         </button>
-
         {/* Hamburger Menu */}
         <button
           onClick={() => setIsMobileMenuOpen((prev) => !prev)}

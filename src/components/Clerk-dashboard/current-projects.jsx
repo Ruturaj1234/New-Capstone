@@ -14,7 +14,6 @@ const ProjectManagement = () => {
 
   // Test toast on component mount
   useEffect(() => {
-    toast.success("Component mounted!"); // Test toast
   }, []);
 
   // Fetch assigned companies
