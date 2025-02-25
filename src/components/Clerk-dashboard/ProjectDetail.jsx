@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaFileInvoiceDollar, FaUpload, FaArrowLeft } from "react-icons/fa";
-
-// Import the separate components
+import { FaFileInvoiceDollar, FaChartLine, FaArrowLeft } from "react-icons/fa";
 import GenerateQuotation from "./GenerateQuotation";
 import SavedQuotation from "./SavedQuotation";
 import GenerateBill from "./GenerateBill";
-import Media from "./Media";
+import TrackRecords from "./TrackRecords"; // Updated component name
 import Sidebar from "./Sidebar";
 
 const ProjectDetail = () => {
   const { clientId, projectId } = useParams();
   const navigate = useNavigate();
 
-  const [projectName, setProjectName] = useState(""); // State for project name
-  const [activeForm, setActiveForm] = useState(null); // 'quotation', 'bill', 'media'
+  const [projectName, setProjectName] = useState("");
+  const [activeForm, setActiveForm] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -47,16 +45,12 @@ const ProjectDetail = () => {
 
   return (
     <div className="flex h-full bg-gray-50">
-      {/* Sidebar */}
       <Sidebar
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
       />
-
-      {/* Main Content */}
       <div className="flex flex-col items-center bg-gray-50 p-6 min-h-screen w-full">
         <div className="bg-white rounded-3xl shadow-xl border border-gray-200 w-full max-w-4xl">
-          {/* Header */}
           <div className="border-b border-gray-200 p-6 md:p-8">
             <div className="flex items-center justify-between">
               <button
@@ -75,8 +69,6 @@ const ProjectDetail = () => {
               />
             </div>
           </div>
-
-          {/* Project Info */}
           <div className="p-6 md:p-8">
             <div className="mb-6">
               <h3 className="text-xl font-semibold text-gray-700">
@@ -85,13 +77,8 @@ const ProjectDetail = () => {
               </h3>
               <h4 className="text-lg text-gray-400">Client ID: {clientId}</h4>
             </div>
-
-            {/* Actions Section */}
-            <h4 className="text-xl font-semibold text-gray-800 mb-4">
-              Actions
-            </h4>
+            <h4 className="text-xl font-semibold text-gray-800 mb-4">Actions</h4>
             <div className="flex flex-col gap-4">
-              {/* Generate Quotation */}
               <button
                 onClick={() => toggleForm("quotation")}
                 className="flex items-center gap-4 p-4 md:p-6 rounded-xl border border-gray-300 hover:shadow-lg hover:border-green-500 hover:bg-green-50 transition-all group"
@@ -115,8 +102,6 @@ const ProjectDetail = () => {
                   onClose={() => setActiveForm(null)}
                 />
               )}
-
-              {/* Saved Quotations */}
               <button
                 onClick={() => toggleForm("SavedQuotation")}
                 className="flex items-center gap-4 p-4 md:p-6 rounded-xl border border-gray-300 hover:shadow-lg hover:border-yellow-500 hover:bg-yellow-50 transition-all group"
@@ -140,8 +125,6 @@ const ProjectDetail = () => {
                   onClose={() => setActiveForm(null)}
                 />
               )}
-
-              {/* Generate Bill */}
               <button
                 onClick={() => toggleForm("bill")}
                 className="flex items-center gap-4 p-4 md:p-6 rounded-xl border border-gray-300 hover:shadow-lg hover:border-blue-500 hover:bg-blue-50 transition-all group"
@@ -165,24 +148,24 @@ const ProjectDetail = () => {
                   onClose={() => setActiveForm(null)}
                 />
               )}
-
-              {/* Media */}
               <button
-                onClick={() => toggleForm("media")}
+                onClick={() => toggleForm("trackRecords")}
                 className="flex items-center gap-4 p-4 md:p-6 rounded-xl border border-gray-300 hover:shadow-lg hover:border-purple-500 hover:bg-purple-50 transition-all group"
               >
                 <div className="p-4 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                  <FaUpload className="w-8 h-8 text-purple-600" />
+                  <FaChartLine className="w-8 h-8 text-purple-600" /> {/* Updated icon */}
                 </div>
                 <div className="flex-grow text-left">
-                  <h3 className="text-lg font-semibold text-gray-900">Media</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Track Records
+                  </h3>
                   <p className="text-sm text-gray-500">
-                    Upload or view media files.
+                    View project progress and status.
                   </p>
                 </div>
               </button>
-              {activeForm === "media" && (
-                <Media
+              {activeForm === "trackRecords" && (
+                <TrackRecords
                   clientId={clientId}
                   projectId={projectId}
                   onClose={() => setActiveForm(null)}

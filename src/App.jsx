@@ -1,5 +1,3 @@
-// src/App.jsx
-
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -15,7 +13,7 @@ import ProjectManagement from "./components/Clerk-dashboard/ProjectManagement";
 import ProjectDetail from "./components/Clerk-dashboard/ProjectDetail";
 import GenerateQuotation from "./components/Clerk-dashboard/GenerateQuotation";
 import GenerateBill from "./components/Clerk-dashboard/GenerateBill";
-import Media from "./components/Clerk-dashboard/Media";
+import TrackRecords from "./components/Clerk-dashboard/TrackRecords"; // Updated from Media
 import QuotationsList from "./components/Clerk-dashboard/QuotationsList";
 import ViewQuotation from "./components/Clerk-dashboard/ViewQuotation";
 import EmployeeManagement from "./components/Clerk-dashboard/employee-management";
@@ -30,7 +28,6 @@ import LeaveSallary from "./components/Employee-dashboard/leavesallary";
 import Company from "./components/Owner-dashboard/clientmanagement/company";
 import Quotationlist from "./components/Owner-dashboard/clientmanagement/quotationlist";
 import QuotationInfo from "./components/Owner-dashboard/clientmanagement/quotationinfo";
-import User from "./components/Owner-dashboard/manageuser/User";
 import ManageUser from "./components/Owner-dashboard/manageuser/User";
 import Revenuemanagement from "./components/Owner-dashboard/revenue/Revenuemanagement";
 import DummyQuotation from "./components/Clerk-dashboard/DummyQuotation";
@@ -39,20 +36,18 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />{" "}
-        {/* Redirect root to /login */}
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
 
         <Route path="/owner-dashboard" element={<OwnerDashboard />} />
-        <Route path="/company" element={<Company/>} />
+        <Route path="/company" element={<Company />} />
         <Route path="/list/:company" element={<Quotationlist />} />
         <Route path="/info/:company/:projectId" element={<QuotationInfo />} />
         <Route path="/manageuser" element={<ManageUser />} />
-        <Route path="/revenue" element={<Revenuemanagement/>}/>
+        <Route path="/revenue" element={<Revenuemanagement />} />
 
-        <Route path="/dummy-quotation" element={<DummyQuotation/>}/>
+        <Route path="/dummy-quotation" element={<DummyQuotation />} />
         <Route path="/clerk-dashboard" element={<ClerkDashboard />} />
-        {/* Add more routes as needed */}
         <Route path="/Employee-dashboard" element={<EmployeeDashboard />} />
         <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/client-management" element={<ClientManagement />} />
@@ -70,8 +65,8 @@ const App = () => {
           element={<GenerateBill />}
         />
         <Route
-          path="/client/:clientId/project/:projectId/media"
-          element={<Media />}
+          path="/client/:clientId/project/:projectId/track-records"
+          element={<TrackRecords />}
         />
         <Route path="/quotations" element={<QuotationsList />} />
         <Route path="/view-quotation/:id" element={<ViewQuotation />} />
