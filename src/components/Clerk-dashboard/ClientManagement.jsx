@@ -12,7 +12,7 @@ const ClientManagement = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingClient, setEditingClient] = useState(null);
-  const [selectedClientId, setSelectedClientId] = useState(null); // Track which client's dropdown is open
+  const [selectedClientId, setSelectedClientId] = useState(null);
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
@@ -21,71 +21,89 @@ const ClientManagement = () => {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch(
-        "http://localhost/login-backend/get_clients.php"
-      );
-
+      const response = await fetch("http://localhost/login-backend/get_clients.php");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
-
       if (data.success) {
         setClients(data.clients);
       } else {
-        toast.error("Failed to fetch clients: " + data.message); // Error toast
+        toast.error("Failed to fetch clients: " + data.message);
       }
     } catch (error) {
       console.error("Error during fetch:", error);
-      toast.error("Error fetching clients: " + error.message); // Error toast
+      toast.error("Error fetching clients: " + error.message);
     }
   };
 
   const handleAddClient = async () => {
     if (clientName.trim()) {
-      const formData = new FormData();
-      formData.append("clientName", clientName);
+      const url = editingClient
+        ? "http://localhost/login-backend/editClient.php"
+        : "http://localhost/login-backend/store_project.php";
+      const method = editingClient ? "POST" : "POST";
+      const body = editingClient
+        ? JSON.stringify({ id: editingClient.id, client_name: clientName })
+        : new FormData();
+
+      if (!editingClient) {
+        body.append("clientName", clientName);
+      }
 
       try {
-        const response = await fetch(
-          "http://localhost/login-backend/store_project.php",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
+        const response = await fetch(url, {
+          method,
+          headers: editingClient ? { "Content-Type": "application/json" } : {},
+          body,
+        });
         const data = await response.json();
 
         if (data.success) {
-          toast.success(data.message); // Success toast
+          toast.success(data.message);
           setClientName("");
           setShowAddClientModal(false);
+          setEditingClient(null);
           fetchClients();
         } else {
-          toast.error("Failed to add client: " + data.message); // Error toast
+          toast.error("Failed to " + (editingClient ? "update" : "add") + " client: " + data.message);
         }
       } catch (error) {
-        console.error("Error adding client:", error);
-        toast.error("Error adding client: " + error.message); // Error toast
+        console.error("Error " + (editingClient ? "updating" : "adding") + " client:", error);
+        toast.error("Error " + (editingClient ? "updating" : "adding") + " client: " + error.message);
       }
     } else {
-      toast.warning("Client name cannot be empty"); // Warning toast
+      toast.warning("Client name cannot be empty");
     }
   };
 
   const handleEditClient = (client) => {
     setEditingClient(client);
-    setClientName(client.client_name); // Pre-fill client name in the modal
+    setClientName(client.client_name);
     setShowAddClientModal(true);
   };
 
-  const handleDeleteClient = (clientId) => {
-    // Here you can handle frontend deletion logic (no backend)
-    const updatedClients = clients.filter((client) => client.id !== clientId);
-    setClients(updatedClients);
-    toast.success("Client deleted successfully!"); // Success toast
+  const handleDeleteClient = async (clientId) => {
+    if (window.confirm("Are you sure you want to delete this client?")) {
+      try {
+        const response = await fetch("http://localhost/login-backend/deleteClient.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: clientId }),
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          toast.success(data.message);
+          fetchClients();
+        } else {
+          toast.error("Failed to delete client: " + data.message);
+        }
+      } catch (error) {
+        console.error("Error deleting client:", error);
+        toast.error("Error deleting client: " + error.message);
+      }
+    }
   };
 
   const toggleDropdown = (clientId) => {
@@ -105,7 +123,6 @@ const ClientManagement = () => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col">
-        {/* Header */}
         <header className="bg-white p-4 shadow-md flex items-center justify-between">
           <button
             onClick={toggleSidebar}
@@ -122,13 +139,11 @@ const ClientManagement = () => {
           </div>
         </header>
 
-        {/* Main Section */}
         <main className="flex-1 flex flex-col items-center p-4 sm:p-6 overflow-hidden">
           <h2 className="text-2xl sm:text-3xl font-bold text-orange-600 mb-6 text-center">
             Client Management
           </h2>
 
-          {/* Search and Add Client */}
           <div className="flex flex-col sm:flex-row justify-center mb-6 w-full gap-4 sm:gap-6 px-2">
             <input
               type="text"
@@ -146,7 +161,6 @@ const ClientManagement = () => {
             </button>
           </div>
 
-          {/* Client List */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl px-2">
             {filteredClients.length > 0 ? (
               filteredClients.map((client, index) => (
@@ -163,7 +177,6 @@ const ClientManagement = () => {
                       Created at: {client.created_at}
                     </p>
 
-                    {/* Dropdown Button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -174,7 +187,6 @@ const ClientManagement = () => {
                       <FaEllipsisV />
                     </button>
 
-                    {/* Dropdown Menu */}
                     {selectedClientId === client.id && (
                       <div className="absolute top-10 right-2 bg-white shadow-lg rounded-lg p-2 z-10">
                         <button
@@ -209,7 +221,6 @@ const ClientManagement = () => {
             )}
           </div>
 
-          {/* Add Client Modal */}
           {showAddClientModal && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 px-2">
               <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-md">
@@ -231,7 +242,11 @@ const ClientManagement = () => {
                     {editingClient ? "Update" : "Add"}
                   </button>
                   <button
-                    onClick={() => setShowAddClientModal(false)}
+                    onClick={() => {
+                      setShowAddClientModal(false);
+                      setEditingClient(null);
+                      setClientName("");
+                    }}
                     className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg text-sm shadow-md hover:bg-gray-400 transition duration-200"
                   >
                     Cancel
@@ -243,7 +258,6 @@ const ClientManagement = () => {
         </main>
       </div>
 
-      {/* Toast Container */}
       <ToastContainer
         position="bottom-right"
         autoClose={3000}

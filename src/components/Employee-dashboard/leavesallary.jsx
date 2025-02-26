@@ -284,6 +284,7 @@ const SalaryLeaveManagement = () => {
             <tr className="bg-gray-200">
               <th className="border border-gray-300 px-4 py-2">Basic Salary</th>
               <th className="border border-gray-300 px-4 py-2">HRA</th>
+              <th className="border border-gray-300 px-4 py-2">DA</th>
               <th className="border border-gray-300 px-4 py-2">Maintainance <br></br>Allowance</th>
               <th className="border border-gray-300 px-4 py-2">Net Salary</th>
               <th className="border border-gray-300 px-4 py-2">Account Number</th>
@@ -294,6 +295,7 @@ const SalaryLeaveManagement = () => {
             <tr>
               <td className="border border-gray-300 px-4 py-2">₹{salaryDetails.salary_basic}</td>
               <td className="border border-gray-300 px-4 py-2">₹{salaryDetails.salary_hra}</td>
+              <td className="border border-gray-300 px-4 py-2">₹{salaryDetails.salary_da}</td>
               <td className="border border-gray-300 px-4 py-2">₹{salaryDetails.salary_maintenance}</td>
               <td className="border border-gray-300 px-4 py-2">₹{salaryDetails.total_salary}</td>
               <td className="border p-2">{salaryDetails.account_number}</td>

@@ -1,28 +1,158 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBars, FaUserAlt, FaRegBuilding, FaMapMarkerAlt, FaBirthdayCake, FaUniversity } from "react-icons/fa";
+import { FaBars, FaUserAlt, FaRegBuilding, FaMapMarkerAlt, FaBirthdayCake, FaUniversity, FaEdit, FaLock } from "react-icons/fa";
 import Sidebar from "./Sidebar";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PersonalInformation = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("personal");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [personalInfo, setPersonalInfo] = useState(null);
+  const [editPersonalModal, setEditPersonalModal] = useState(false);
+  const [editBankModal, setEditBankModal] = useState(false);
+  const [changePasswordModal, setChangePasswordModal] = useState(false);
+
+  // Personal info form state
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [image, setImage] = useState(null);
+
+  // Bank info form state
+  const [accountNumber, setAccountNumber] = useState("");
+  const [ifscCode, setIfscCode] = useState("");
+
+  // Password change form state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const response = await fetch("http://localhost/login-backend/get_user_info.php");
-        const data = await response.json();
-        if (data.success) {
-          setPersonalInfo(data.employee);
-        }
-      } catch (error) {
-        console.error("Error fetching user info:", error);
-      }
-    };
     fetchUserInfo();
   }, []);
+
+  const fetchUserInfo = async () => {
+    try {
+      const response = await fetch("http://localhost/login-backend/get_user_info.php");
+      const data = await response.json();
+      if (data.success) {
+        setPersonalInfo(data.employee);
+        setName(data.employee.name);
+        setAddress(data.employee.address || "");
+        setDateOfBirth(data.employee.date_of_birth || "");
+        setContactNumber(data.employee.contact_number || "");
+        setEmail(data.employee.email || "");
+        setAccountNumber(data.employee.account_number || "");
+        setIfscCode(data.employee.ifsc_code || "");
+      } else {
+        toast.error("Failed to fetch employee details: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching employee details:", error);
+      toast.error("Error fetching employee details: " + error.message);
+    }
+  };
+
+  const handleEditPersonal = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("eid", personalInfo.eid);
+    formData.append("name", name);
+    formData.append("address", address);
+    formData.append("date_of_birth", dateOfBirth);
+    formData.append("contact_number", contactNumber);
+    formData.append("email", email);
+    if (image) formData.append("image", image);
+
+    try {
+      const response = await fetch("http://localhost/login-backend/updateEmployeeDetails.php", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message);
+        setEditPersonalModal(false);
+        setImage(null);
+        fetchUserInfo();
+      } else {
+        toast.error("Failed to update personal details: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error updating personal details:", error);
+      toast.error("Error updating personal details: " + error.message);
+    }
+  };
+
+  const handleEditBank = async (e) => {
+    e.preventDefault();
+    if (!personalInfo.eid || !accountNumber || !ifscCode) {
+      toast.error("Missing required fields: " + 
+        (!personalInfo.eid ? "Employee ID " : "") + 
+        (!accountNumber ? "Account Number " : "") + 
+        (!ifscCode ? "IFSC Code" : ""));
+      return;
+    }
+
+    const payload = {
+      eid: personalInfo.eid,
+      account_number: accountNumber,
+      ifsc_code: ifscCode,
+    };
+    console.log("Sending payload to updateBankDetails:", payload); // Debug log
+
+    try {
+      const response = await fetch("http://localhost/login-backend/updateBankDetails.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message);
+        setEditBankModal(false);
+        fetchUserInfo();
+      } else {
+        toast.error("Failed to update bank details: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error updating bank details:", error);
+      toast.error("Error updating bank details: " + error.message);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost/login-backend/changePassword.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eid: personalInfo.eid,
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message);
+        setChangePasswordModal(false);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast.error("Failed to change password: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast.error("Error changing password: " + error.message);
+    }
+  };
 
   if (!personalInfo) {
     return (
@@ -37,7 +167,6 @@ const PersonalInformation = () => {
       <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
       <div className="flex-1 flex flex-col">
-        {/* Top Navigation */}
         <nav className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
@@ -61,22 +190,25 @@ const PersonalInformation = () => {
         </nav>
 
         <div className="flex-1 flex flex-col px-4 sm:px-6 lg:px-8 py-8">
-          {/* Profile Header */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div className="flex items-center space-x-4">
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6 flex items-center space-x-4">
+            {personalInfo.image ? (
+              <img
+                src={`http://localhost/login-backend/${personalInfo.image}`}
+                alt="Employee"
+                className="h-16 w-16 rounded-full object-cover"
+              />
+            ) : (
               <div className="h-16 w-16 bg-orange-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                 {personalInfo.name.charAt(0)}
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{personalInfo.name}</h1>
-                <p className="text-sm text-gray-500">Employee Profile</p>
-              </div>
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{personalInfo.name}</h1>
+              <p className="text-sm text-gray-500">Employee Profile</p>
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="bg-white rounded-lg shadow-sm flex-1">
-            {/* Tabs */}
             <div className="border-b border-gray-200">
               <div className="flex">
                 <button
@@ -104,7 +236,6 @@ const PersonalInformation = () => {
               </div>
             </div>
 
-            {/* Content */}
             <div className="p-6 flex-1">
               {activeTab === "personal" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,16 +249,44 @@ const PersonalInformation = () => {
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3 text-gray-600">
                       <FaBirthdayCake className="text-orange-500" />
-                      <span className="font-medium">Age</span>
+                      <span className="font-medium">Date of Birth</span>
                     </div>
-                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.age}</p>
+                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.date_of_birth || "N/A"}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3 text-gray-600">
+                      <FaUserAlt className="text-orange-500" />
+                      <span className="font-medium">Contact Number</span>
+                    </div>
+                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.contact_number || "N/A"}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3 text-gray-600">
+                      <FaUserAlt className="text-orange-500" />
+                      <span className="font-medium">Email</span>
+                    </div>
+                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.email || "N/A"}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-lg md:col-span-2">
                     <div className="flex items-center space-x-3 text-gray-600">
                       <FaMapMarkerAlt className="text-orange-500" />
                       <span className="font-medium">Address</span>
                     </div>
-                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.address}</p>
+                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.address || "N/A"}</p>
+                  </div>
+                  <div className="md:col-span-2 flex justify-end gap-4 mt-4">
+                    <button
+                      onClick={() => setEditPersonalModal(true)}
+                      className="bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:bg-orange-700 transition duration-200"
+                    >
+                      <FaEdit /> Edit Personal Info
+                    </button>
+                    <button
+                      onClick={() => setChangePasswordModal(true)}
+                      className="bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:bg-orange-700 transition duration-200"
+                    >
+                      <FaLock /> Change Password
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -137,20 +296,213 @@ const PersonalInformation = () => {
                       <FaUniversity className="text-orange-500" />
                       <span className="font-medium">Account Number</span>
                     </div>
-                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.account_number}</p>
+                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.account_number || "N/A"}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3 text-gray-600">
                       <FaRegBuilding className="text-orange-500" />
                       <span className="font-medium">IFSC Code</span>
                     </div>
-                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.ifsc_code}</p>
+                    <p className="mt-2 text-gray-900 font-medium pl-8">{personalInfo.ifsc_code || "N/A"}</p>
+                  </div>
+                  <div className="md:col-span-2 flex justify-end mt-4">
+                    <button
+                      onClick={() => setEditBankModal(true)}
+                      className="bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:bg-orange-700 transition duration-200"
+                    >
+                      <FaEdit /> Edit Bank Info
+                    </button>
                   </div>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Edit Personal Info Modal */}
+          {editPersonalModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h2 className="text-xl font-semibold mb-4">Edit Personal Information</h2>
+                <form onSubmit={handleEditPersonal}>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Name</label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Address</label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Date of Birth</label>
+                    <input
+                      type="date"
+                      value={dateOfBirth}
+                      onChange={(e) => setDateOfBirth(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Contact Number</label>
+                    <input
+                      type="text"
+                      value={contactNumber}
+                      onChange={(e) => setContactNumber(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Profile Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setImage(e.target.files[0])}
+                      className="w-full p-2 border rounded-lg"
+                    />
+                  </div>
+                  <div className="flex justify-between">
+                    <button
+                      type="submit"
+                      className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditPersonalModal(false)}
+                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Bank Info Modal */}
+          {editBankModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h2 className="text-xl font-semibold mb-4">Edit Bank Information</h2>
+                <form onSubmit={handleEditBank}>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Account Number</label>
+                    <input
+                      type="text"
+                      value={accountNumber}
+                      onChange={(e) => setAccountNumber(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">IFSC Code</label>
+                    <input
+                      type="text"
+                      value={ifscCode}
+                      onChange={(e) => setIfscCode(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-between">
+                    <button
+                      type="submit"
+                      className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditBankModal(false)}
+                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Change Password Modal */}
+          {changePasswordModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h2 className="text-xl font-semibold mb-4">Change Password</h2>
+                <form onSubmit={handleChangePassword}>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Current Password</label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">New Password</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full p-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-between">
+                    <button
+                      type="submit"
+                      className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+                    >
+                      Change Password
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setChangePasswordModal(false)}
+                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
+
+        <ToastContainer position="bottom-right" autoClose={3000} />
       </div>
     </div>
   );

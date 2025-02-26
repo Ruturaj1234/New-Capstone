@@ -27,6 +27,9 @@ const Revenuemanagement = () => {
   const [projectCount, setProjectCount] = useState(0);
   const [employeeCount, setEmployeeCount] = useState(0);
   const [clerkCount, setClerkCount] = useState(0);
+  const [monthlySales, setMonthlySales] = useState([]);
+  const [clientProjects, setClientProjects] = useState({ clients: [], counts: [] });
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     fetch("http://localhost/login-backend/Owner-management/getCounts.php")
@@ -55,8 +58,42 @@ const Revenuemanagement = () => {
       }
     };
 
+    const fetchMonthlySales = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost/login-backend/Owner-management/getMonthlySales.php?year=${selectedYear}`
+        );
+        const data = await response.json();
+        if (data.success) {
+          setMonthlySales(data.sales);
+        } else {
+          console.error("Failed to fetch monthly sales:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching monthly sales:", error);
+      }
+    };
+
+    const fetchClientProjects = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost/login-backend/Owner-management/getClientProjects.php"
+        );
+        const data = await response.json();
+        if (data.success) {
+          setClientProjects({ clients: data.clients, counts: data.counts });
+        } else {
+          console.error("Failed to fetch client projects:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching client projects:", error);
+      }
+    };
+
     fetchUsers();
-  }, []);
+    fetchMonthlySales();
+    fetchClientProjects();
+  }, [selectedYear]);
 
   // Gradient backgrounds
   const gradient1 = (context) => {
@@ -77,38 +114,30 @@ const Revenuemanagement = () => {
     return gradient;
   };
 
-  // Data and options for the first bar graph
+  // Monthly Sales Graph
   const barData1 = {
     labels: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
     ],
     datasets: [
       {
-        label: "Sales (in ₹K)",
-        data: [40, 60, 80, 70, 90, 100, 110, 95, 85, 75, 65, 55],
+        label: `Sales (in ₹) - ${selectedYear}`,
+        data: monthlySales.length ? monthlySales : Array(12).fill(0),
         backgroundColor: (context) => gradient1(context),
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 2,
       },
     ],
   };
+
+  // Companies Projects Graph
   const barData2 = {
-    labels: ["Company A", "Company B", "Company C", "Company D", "Company E"],
+    labels: clientProjects.clients.length ? clientProjects.clients : ["No Data"],
     datasets: [
       {
-        label: "Revenue (in ₹K)",
-        data: [200, 150, 300, 250, 180],
+        label: "Project Count",
+        data: clientProjects.counts.length ? clientProjects.counts : [0],
         backgroundColor: (context) => gradient2(context),
         borderColor: "rgba(153, 102, 255, 1)",
         borderWidth: 2,
@@ -131,7 +160,7 @@ const Revenuemanagement = () => {
       },
       tooltip: {
         callbacks: {
-          label: (context) => "₹" + context.raw + "K", // Fixed
+          label: (context) => "₹" + context.raw.toLocaleString(), // Exact rupees with commas
         },
       },
     },
@@ -141,7 +170,7 @@ const Revenuemanagement = () => {
         grid: { color: "rgba(200, 200, 200, 0.5)" },
         ticks: {
           color: "#333",
-          callback: (value) => "₹" + value + "K", // Fixed
+          callback: (value) => "₹" + value.toLocaleString(), // Exact rupees with commas
         },
       },
     },
@@ -156,13 +185,13 @@ const Revenuemanagement = () => {
       },
       title: {
         display: true,
-        text: "Top 5 Companies",
+        text: "Top 5 Client Projects",
         color: "#333",
         font: { size: 18 },
       },
       tooltip: {
         callbacks: {
-          label: (context) => "₹" + context.raw + "K", // Fixed
+          label: (context) => context.raw + " Projects",
         },
       },
     },
@@ -170,10 +199,7 @@ const Revenuemanagement = () => {
       x: { grid: { display: false }, ticks: { color: "#333" } },
       y: {
         grid: { color: "rgba(200, 200, 200, 0.5)" },
-        ticks: {
-          color: "#333",
-          callback: (value) => "₹" + value + "K", // Fixed
-        },
+        ticks: { color: "#333" },
       },
     },
   };
@@ -223,15 +249,28 @@ const Revenuemanagement = () => {
                 </div>
               ))}
             </div>
-               {/* Corrected Bar Graph Section inside <main> */}
-          <div className="space-y-12 p-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <Bar data={barData1} options={barOptions1} />
+            <div className="space-y-12">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-700">Monthly Sales</h3>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                    className="p-2 border rounded-lg bg-orange-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    {[2023, 2024, 2025].map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Bar data={barData1} options={barOptions1} />
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <Bar data={barData2} options={barOptions2} />
+              </div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <Bar data={barData2} options={barOptions2} />
-            </div>
-          </div>
           </div>
         </main>
       </div>

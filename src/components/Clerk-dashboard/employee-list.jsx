@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { FaSearch } from "react-icons/fa"; // For the search icon
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [employeeDetails, setEmployeeDetails] = useState(null);
   const [viewDetails, setViewDetails] = useState(false);
@@ -12,6 +14,7 @@ const EmployeeList = () => {
     salary_hra: "",
     salary_maintenance: "",
   });
+  const [searchQuery, setSearchQuery] = useState(""); // New state for search
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -21,6 +24,7 @@ const EmployeeList = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           setEmployees(data);
+          setFilteredEmployees(data); // Initially show all employees
         } else {
           setError("Invalid data format received from the server.");
         }
@@ -31,6 +35,15 @@ const EmployeeList = () => {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Filter employees based on search query
+  useEffect(() => {
+    const filtered = employees.filter((employee) =>
+      [employee.id.toString(), employee.name.toLowerCase(), employee.email?.toLowerCase() || ""]
+        .some((field) => field.includes(searchQuery.toLowerCase()))
+    );
+    setFilteredEmployees(filtered);
+  }, [searchQuery, employees]);
 
   const fetchEmployeeDetails = (employeeId) => {
     setLoading(true);
@@ -58,8 +71,7 @@ const EmployeeList = () => {
   };
 
   const calculateTotalSalary = () => {
-    const { salary_basic, salary_da, salary_hra, salary_maintenance } =
-      employeeDetails;
+    const { salary_basic, salary_da, salary_hra, salary_maintenance } = employeeDetails;
     return (
       parseFloat(salary_basic || 0) +
       parseFloat(salary_da || 0) +
@@ -128,26 +140,29 @@ const EmployeeList = () => {
       {!viewDetails ? (
         <div>
           <h3 className="text-2xl font-bold text-gray-800 mb-6">Employee List</h3>
+          {/* Search Bar aligned to the left */}
+<div className="relative max-w-md mb-6 ml-0">  
+  <input
+    type="text"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    placeholder="Search by ID, Name, or Email..."
+    className="w-full py-3 pl-12 pr-4 bg-gradient-to-r from-gray-50 to-white text-gray-800 border-2 border-black-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+  />
+  <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black-500 text-lg" />
+</div>
+
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white border border-gray-200">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                    Name
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                    Age
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                    Address
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                    Account Number
-                  </th>
+                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">ID</th>
+                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Name</th>
+                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Email</th>
                 </tr>
               </thead>
               <tbody>
-                {employees.map((employee) => (
+                {filteredEmployees.map((employee) => (
                   <tr
                     key={employee.id}
                     onClick={() => {
@@ -156,18 +171,9 @@ const EmployeeList = () => {
                     }}
                     className="cursor-pointer hover:bg-blue-50 transition-colors duration-200"
                   >
-                    <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">
-                      {employee.name}
-                    </td>
-                    <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">
-                      {employee.age}
-                    </td>
-                    <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">
-                      {employee.address}
-                    </td>
-                    <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">
-                      {employee.account_number}
-                    </td>
+                    <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">{employee.id}</td>
+                    <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">{employee.name}</td>
+                    <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">{employee.email || "N/A"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -184,82 +190,82 @@ const EmployeeList = () => {
           </button>
           {employeeDetails && (
             <div className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-8">
-                Employee Details: {employeeDetails.name}
-              </h2>
+              <div className="flex items-center space-x-4 mb-8">
+                {employeeDetails.image ? (
+                  <img
+                    src={`http://localhost/login-backend/${employeeDetails.image}`}
+                    alt="Employee"
+                    className="h-16 w-16 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-16 w-16 bg-orange-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                    {employeeDetails.name.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">{employeeDetails.name}</h2>
+                  <p className="text-sm text-gray-500">Employee Details</p>
+                </div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Personal Information
-                  </h3>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Personal Information</h3>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-600">Age</p>
-                      <p className="text-lg text-gray-800">{employeeDetails.age}</p>
+                      <p className="text-sm text-gray-600">Address</p>
+                      <p className="text-lg text-gray-800">{employeeDetails.address || "N/A"}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Address</p>
-                      <p className="text-lg text-gray-800">
-                        {employeeDetails.address}
-                      </p>
+                      <p className="text-sm text-gray-600">Date of Birth</p>
+                      <p className="text-lg text-gray-800">{employeeDetails.date_of_birth || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Contact Number</p>
+                      <p className="text-lg text-gray-800">{employeeDetails.contact_number || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Email</p>
+                      <p className="text-lg text-gray-800">{employeeDetails.email || "N/A"}</p>
                     </div>
                   </div>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Bank Information
-                  </h3>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Bank Information</h3>
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-600">Account Number</p>
-                      <p className="text-lg text-gray-800">
-                        {employeeDetails.account_number}
-                      </p>
+                      <p className="text-lg text-gray-800">{employeeDetails.account_number || "N/A"}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">IFSC Code</p>
-                      <p className="text-lg text-gray-800">
-                        {employeeDetails.ifsc_code}
-                      </p>
+                      <p className="text-lg text-gray-800">{employeeDetails.ifsc_code || "N/A"}</p>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-8">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                  Salary Details
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">Salary Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-sm text-gray-600">Basic Salary</p>
-                    <p className="text-lg text-gray-800">
-                      ₹{employeeDetails.salary_basic}
-                    </p>
+                    <p className="text-lg text-gray-800">₹{employeeDetails.salary_basic || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">DA</p>
-                    <p className="text-lg text-gray-800">
-                      ₹{employeeDetails.salary_da}
-                    </p>
+                    <p className="text-lg text-gray-800">₹{employeeDetails.salary_da || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">HRA</p>
-                    <p className="text-lg text-gray-800">
-                      ₹{employeeDetails.salary_hra}
-                    </p>
+                    <p className="text-lg text-gray-800">₹{employeeDetails.salary_hra || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Maintenance Allowance</p>
-                    <p className="text-lg text-gray-800">
-                      ₹{employeeDetails.salary_maintenance}
-                    </p>
+                    <p className="text-lg text-gray-800">₹{employeeDetails.salary_maintenance || "N/A"}</p>
                   </div>
                 </div>
                 <div className="mt-6">
                   <p className="text-sm text-gray-600">Total Salary</p>
-                  <p className="text-xl font-bold text-gray-800">
-                    ₹{calculateTotalSalary()}
-                  </p>
+                  <p className="text-xl font-bold text-gray-800">₹{calculateTotalSalary()}</p>
                 </div>
               </div>
               <button
