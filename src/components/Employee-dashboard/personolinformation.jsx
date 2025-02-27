@@ -10,19 +10,18 @@ const PersonalInformation = () => {
   const [activeTab, setActiveTab] = useState("personal");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [personalInfo, setPersonalInfo] = useState(null);
+  const [detailsExist, setDetailsExist] = useState(true);
   const [editPersonalModal, setEditPersonalModal] = useState(false);
   const [editBankModal, setEditBankModal] = useState(false);
   const [changePasswordModal, setChangePasswordModal] = useState(false);
 
-  // Personal info form state
+  // Personal info form state (for both edit and initial add)
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [email, setEmail] = useState("");
   const [image, setImage] = useState(null);
-
-  // Bank info form state
   const [accountNumber, setAccountNumber] = useState("");
   const [ifscCode, setIfscCode] = useState("");
 
@@ -40,20 +39,57 @@ const PersonalInformation = () => {
       const response = await fetch("http://localhost/login-backend/get_user_info.php");
       const data = await response.json();
       if (data.success) {
-        setPersonalInfo(data.employee);
-        setName(data.employee.name);
-        setAddress(data.employee.address || "");
-        setDateOfBirth(data.employee.date_of_birth || "");
-        setContactNumber(data.employee.contact_number || "");
-        setEmail(data.employee.email || "");
-        setAccountNumber(data.employee.account_number || "");
-        setIfscCode(data.employee.ifsc_code || "");
+        if (data.details_exist) {
+          setPersonalInfo(data.employee);
+          setDetailsExist(true);
+          setName(data.employee.name);
+          setAddress(data.employee.address || "");
+          setDateOfBirth(data.employee.date_of_birth || "");
+          setContactNumber(data.employee.contact_number || "");
+          setEmail(data.employee.email || "");
+          setAccountNumber(data.employee.account_number || "");
+          setIfscCode(data.employee.ifsc_code || "");
+        } else {
+          setPersonalInfo({ eid: data.eid }); // Only eid for new user
+          setDetailsExist(false);
+        }
       } else {
         toast.error("Failed to fetch employee details: " + data.message);
       }
     } catch (error) {
       console.error("Error fetching employee details:", error);
       toast.error("Error fetching employee details: " + error.message);
+    }
+  };
+
+  const handleAddDetails = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("eid", personalInfo.eid);
+    formData.append("name", name);
+    formData.append("address", address);
+    formData.append("date_of_birth", dateOfBirth);
+    formData.append("contact_number", contactNumber);
+    formData.append("email", email);
+    formData.append("account_number", accountNumber);
+    formData.append("ifsc_code", ifscCode);
+    if (image) formData.append("image", image);
+
+    try {
+      const response = await fetch("http://localhost/login-backend/addEmployeeDetails.php", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message);
+        fetchUserInfo(); // Reload to show Personal Info page
+      } else {
+        toast.error("Failed to add details: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error adding details:", error);
+      toast.error("Error adding details: " + error.message);
     }
   };
 
@@ -103,8 +139,6 @@ const PersonalInformation = () => {
       account_number: accountNumber,
       ifsc_code: ifscCode,
     };
-    console.log("Sending payload to updateBankDetails:", payload); // Debug log
-
     try {
       const response = await fetch("http://localhost/login-backend/updateBankDetails.php", {
         method: "POST",
@@ -162,6 +196,102 @@ const PersonalInformation = () => {
     );
   }
 
+  // If details don't exist, show form to add them
+  if (!detailsExist) {
+    return (
+      <div className="flex min-h-screen bg-gray-100 justify-center items-center">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Complete Your Profile
+          </h2>
+          <form onSubmit={handleAddDetails}>
+            <div className="mb-4">
+              <label className="block text-gray-700">Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Address</label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Date of Birth</label>
+              <input
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Contact Number</label>
+              <input
+                type="text"
+                value={contactNumber}
+                onChange={(e) => setContactNumber(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Account Number</label>
+              <input
+                type="text"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">IFSC Code</label>
+              <input
+                type="text"
+                value={ifscCode}
+                onChange={(e) => setIfscCode(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Profile Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition duration-200"
+            >
+              Save Details
+            </button>
+          </form>
+          <ToastContainer position="bottom-right" autoClose={3000} />
+        </div>
+      </div>
+    );
+  }
+
+  // Normal Personal Information page if details exist
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />

@@ -8,12 +8,14 @@ import {
   Trash2,
   X,
   Plus,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Sidebar from "../Sidebar";
 import { FaBars } from "react-icons/fa";
 
 const ManageUser = () => {
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false); // Toggle password visibility
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeView, setActiveView] = useState(null);
@@ -66,16 +68,18 @@ const ManageUser = () => {
     setEditingUser(null);
     setFormData({ username: "", password: "", role: "" });
     setMessage({ type: "", content: "" });
+    setIsPasswordVisible(false); // Reset visibility
   };
 
   const handleEdit = (user) => {
     setEditingUser(user);
     setFormData({
       username: user.username,
-      password: "",
+      password: user.password, // Prefill password
       role: user.role,
     });
     setIsFormVisible(true);
+    setIsPasswordVisible(false); // Start with hidden password
   };
 
   const handleCloseForm = () => {
@@ -83,6 +87,7 @@ const ManageUser = () => {
     setEditingUser(null);
     setFormData({ username: "", password: "", role: "" });
     setMessage({ type: "", content: "" });
+    setIsPasswordVisible(false);
   };
 
   const handleDelete = async (userId, role) => {
@@ -236,7 +241,6 @@ const ManageUser = () => {
                   className="h-10 w-auto mr-4"
                 />
               </div>
-
               <button
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                 className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
@@ -296,14 +300,13 @@ const ManageUser = () => {
                 <button
                   onClick={() => setActiveView("clerks")}
                   className={`px-6 py-3 rounded-lg text-sm font-medium ${
-                    activeView === "clerks"
-                      ? "bg-orange-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+activeView === "clerks"
+                    ? "bg-orange-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
                   }`}
                 >
                   View Clerks
                 </button>
-
                 <button
                   onClick={handleAddUser}
                   className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
@@ -355,12 +358,12 @@ const ManageUser = () => {
                         />
                       </div>
 
-                      <div>
+                      <div className="relative">
                         <label className="block text-sm font-medium text-gray-600">
                           Password
                         </label>
                         <input
-                          type="password"
+                          type={isPasswordVisible ? "text" : "password"}
                           value={formData.password}
                           onChange={(e) =>
                             setFormData({
@@ -368,9 +371,20 @@ const ManageUser = () => {
                               password: e.target.value,
                             })
                           }
-                          required={!editingUser}
-                          className="mt-1 p-3 border border-gray-300 rounded-md w-full"
+                          required={!editingUser} // Only required for new users
+                          className="mt-1 p-3 border border-gray-300 rounded-md w-full pr-10"
                         />
+                        <button
+                          type="button"
+                          onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                          className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                        >
+                          {isPasswordVisible ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
                       </div>
 
                       <div>

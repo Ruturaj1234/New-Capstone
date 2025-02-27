@@ -27,8 +27,10 @@ const Revenuemanagement = () => {
   const [projectCount, setProjectCount] = useState(0);
   const [employeeCount, setEmployeeCount] = useState(0);
   const [clerkCount, setClerkCount] = useState(0);
+  const [inProgressCount, setInProgressCount] = useState(0);
   const [monthlySales, setMonthlySales] = useState([]);
   const [clientProjects, setClientProjects] = useState({ clients: [], counts: [] });
+  const [projectProgress, setProjectProgress] = useState({ projects: [], percentages: [] });
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
@@ -90,9 +92,27 @@ const Revenuemanagement = () => {
       }
     };
 
+    const fetchProjectProgress = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost/login-backend/Owner-management/getProjectProgress.php"
+        );
+        const data = await response.json();
+        if (data.success) {
+          setInProgressCount(data.in_progress);
+          setProjectProgress({ projects: data.projects, percentages: data.percentages });
+        } else {
+          console.error("Failed to fetch project progress:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching project progress:", error);
+      }
+    };
+
     fetchUsers();
     fetchMonthlySales();
     fetchClientProjects();
+    fetchProjectProgress();
   }, [selectedYear]);
 
   // Gradient backgrounds
@@ -114,6 +134,15 @@ const Revenuemanagement = () => {
     return gradient;
   };
 
+  const gradient3 = (context) => {
+    const { chart } = context;
+    const ctx = chart.ctx;
+    const gradient = ctx.createLinearGradient(0, 0, 0, chart.height);
+    gradient.addColorStop(0, "rgba(255, 159, 64, 1)");
+    gradient.addColorStop(1, "rgba(255, 159, 64, 0.1)");
+    return gradient;
+  };
+
   // Monthly Sales Graph
   const barData1 = {
     labels: [
@@ -131,7 +160,7 @@ const Revenuemanagement = () => {
     ],
   };
 
-  // Companies Projects Graph
+  // Client Projects Graph
   const barData2 = {
     labels: clientProjects.clients.length ? clientProjects.clients : ["No Data"],
     datasets: [
@@ -140,6 +169,20 @@ const Revenuemanagement = () => {
         data: clientProjects.counts.length ? clientProjects.counts : [0],
         backgroundColor: (context) => gradient2(context),
         borderColor: "rgba(153, 102, 255, 1)",
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  // Project Progress Graph
+  const barData3 = {
+    labels: projectProgress.projects.length ? projectProgress.projects : ["No Projects"],
+    datasets: [
+      {
+        label: "Completion Percentage",
+        data: projectProgress.percentages.length ? projectProgress.percentages : [0],
+        backgroundColor: (context) => gradient3(context),
+        borderColor: "rgba(255, 159, 64, 1)",
         borderWidth: 2,
       },
     ],
@@ -160,7 +203,7 @@ const Revenuemanagement = () => {
       },
       tooltip: {
         callbacks: {
-          label: (context) => "₹" + context.raw.toLocaleString(), // Exact rupees with commas
+          label: (context) => "₹" + context.raw.toLocaleString(),
         },
       },
     },
@@ -170,7 +213,7 @@ const Revenuemanagement = () => {
         grid: { color: "rgba(200, 200, 200, 0.5)" },
         ticks: {
           color: "#333",
-          callback: (value) => "₹" + value.toLocaleString(), // Exact rupees with commas
+          callback: (value) => "₹" + value.toLocaleString(),
         },
       },
     },
@@ -204,6 +247,35 @@ const Revenuemanagement = () => {
     },
   };
 
+  const barOptions3 = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+        labels: { color: "#333", font: { size: 14 } },
+      },
+      title: {
+        display: true,
+        text: "Current Project Progress",
+        color: "#333",
+        font: { size: 18 },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => context.raw + "%",
+        },
+      },
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: "#333" } },
+      y: {
+        grid: { color: "rgba(200, 200, 200, 0.5)" },
+        ticks: { color: "#333", callback: (value) => value + "%" },
+        max: 100,
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800">
       <div className="flex">
@@ -233,6 +305,7 @@ const Revenuemanagement = () => {
               {[
                 { title: "Clients", count: clientCount },
                 { title: "Projects", count: projectCount },
+                { title: "Projects in Progress", count: inProgressCount },
                 { title: "Clerks", count: clerkCount },
                 { title: "Employees", count: employeeCount },
               ].map((item, index) => (
@@ -269,6 +342,9 @@ const Revenuemanagement = () => {
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <Bar data={barData2} options={barOptions2} />
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <Bar data={barData3} options={barOptions3} />
               </div>
             </div>
           </div>
