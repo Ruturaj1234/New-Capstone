@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { FaUsers, FaTasks, FaEnvelope, FaClipboardList, FaCheck, FaTimes } from "react-icons/fa";
+import {
+  FaUsers,
+  FaTasks,
+  FaEnvelope,
+  FaClipboardList,
+  FaCheck,
+  FaTimes,
+} from "react-icons/fa";
 import EmployeeList from "./employee-list";
 import AssignWork from "./assign-work";
 import CurrentProjects from "./current-projects";
@@ -59,24 +66,35 @@ const EmployeeManagement = () => {
   };
 
   // Filter only pending leave requests
-  const pendingLeaveRequests = leaveRequests.filter((request) => request.status === "pending");
+  const pendingLeaveRequests = leaveRequests.filter(
+    (request) => request.status === "pending"
+  );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-100 font-poppins">
       {/* Sidebar */}
-      <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <Sidebar
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white p-4 shadow-sm flex items-center justify-between">
-          <img src="https://www.saisamarthpolytech.com/images/logo.png" alt="Sai Samarth Polytech" className="h-10 w-auto mr-4" />
-          <button
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden transition-colors duration-200"
-          >
-            <FaBars size={24} />
-          </button>
+        <header className="bg-white/30 backdrop-blur-md p-4 shadow-md flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
+            >
+              <FaBars size={24} />
+            </button>
+            <img
+              src="https://www.saisamarthpolytech.com/images/logo.png"
+              alt="Sai Samarth Polytech"
+              className="h-10 w-auto ml-4"
+            />
+          </div>
         </header>
 
         {/* Main Content Area */}
@@ -89,9 +107,13 @@ const EmployeeManagement = () => {
             >
               <div className="flex items-center mb-3 sm:mb-4">
                 <FaUsers className="text-blue-500 text-xl sm:text-2xl mr-2 sm:mr-3" />
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Employee List</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  Employee List
+                </h2>
               </div>
-              <p className="text-sm sm:text-base text-gray-500">View and manage all employees.</p>
+              <p className="text-sm sm:text-base text-gray-500">
+                View and manage all employees.
+              </p>
             </div>
 
             {/* Assign Work Section */}
@@ -101,9 +123,13 @@ const EmployeeManagement = () => {
             >
               <div className="flex items-center mb-3 sm:mb-4">
                 <FaTasks className="text-green-500 text-xl sm:text-2xl mr-2 sm:mr-3" />
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Assign Work</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  Assign Work
+                </h2>
               </div>
-              <p className="text-sm sm:text-base text-gray-500">Assign tasks to employees.</p>
+              <p className="text-sm sm:text-base text-gray-500">
+                Assign tasks to employees.
+              </p>
             </div>
 
             {/* Current Projects Section */}
@@ -113,9 +139,13 @@ const EmployeeManagement = () => {
             >
               <div className="flex items-center mb-3 sm:mb-4">
                 <FaClipboardList className="text-purple-500 text-xl sm:text-2xl mr-2 sm:mr-3" />
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Current Projects</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  Current Projects
+                </h2>
               </div>
-              <p className="text-sm sm:text-base text-gray-500">Track ongoing projects.</p>
+              <p className="text-sm sm:text-base text-gray-500">
+                Track ongoing projects.
+              </p>
             </div>
 
             {/* Requests Section */}
@@ -125,25 +155,27 @@ const EmployeeManagement = () => {
             >
               <div className="flex items-center mb-3 sm:mb-4">
                 <FaEnvelope className="text-red-500 text-xl sm:text-2xl mr-2 sm:mr-3" />
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Requests</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  Requests
+                </h2>
               </div>
               {pendingLeaveRequests.length > 0 ? (
-                <p className="text-sm sm:text-base text-gray-500">{pendingLeaveRequests.length} pending requests.</p>
+                <p className="text-sm sm:text-base text-gray-500">
+                  {pendingLeaveRequests.length} pending requests.
+                </p>
               ) : (
-                <p className="text-sm sm:text-base text-gray-500">No requests at the moment.</p>
+                <p className="text-sm sm:text-base text-gray-500">
+                  No requests at the moment.
+                </p>
               )}
             </div>
           </div>
 
           {/* Render content based on selection */}
           <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-            {showContent === "employeeList" && (
-              <EmployeeList />
-            )}
+            {showContent === "employeeList" && <EmployeeList />}
 
-            {showContent === "assignWork" && (
-              <AssignWork />
-            )}
+            {showContent === "assignWork" && <AssignWork />}
 
             {showContent === "workingProjects" && <CurrentProjects />}
 
@@ -152,18 +184,25 @@ const EmployeeManagement = () => {
                 <h2 className="text-xl font-semibold mb-4">Leave Requests</h2>
                 {pendingLeaveRequests.length > 0 ? (
                   pendingLeaveRequests.map((request) => (
-                    <div key={request.id} className="mb-6 border p-4 rounded-lg shadow">
+                    <div
+                      key={request.id}
+                      className="mb-6 border p-4 rounded-lg shadow"
+                    >
                       <div className="flex justify-between items-center mb-4">
                         <div>
                           <button
                             className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2"
-                            onClick={() => handleLeaveRequestAction(request.id, "approved")}
+                            onClick={() =>
+                              handleLeaveRequestAction(request.id, "approved")
+                            }
                           >
                             <FaCheck className="inline mr-2" /> Approve
                           </button>
                           <button
                             className="bg-red-600 text-white px-4 py-2 rounded-lg"
-                            onClick={() => handleLeaveRequestAction(request.id, "declined")}
+                            onClick={() =>
+                              handleLeaveRequestAction(request.id, "declined")
+                            }
                           >
                             <FaTimes className="inline mr-2" /> Decline
                           </button>
@@ -192,12 +231,18 @@ const EmployeeManagement = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-gray-600">No pending requests.</p>
+                  <p className="text-center text-gray-600">
+                    No pending requests.
+                  </p>
                 )}
               </div>
             )}
 
-            {message && <p className="mt-4 text-green-500 text-sm sm:text-base font-medium">{message}</p>}
+            {message && (
+              <p className="mt-4 text-green-500 text-sm sm:text-base font-medium">
+                {message}
+              </p>
+            )}
           </div>
         </main>
       </div>
@@ -213,18 +258,25 @@ const EmployeeManagement = () => {
               <p className="text-center text-gray-600">No pending requests.</p>
             ) : (
               pendingLeaveRequests.map((request) => (
-                <div key={request.id} className="mb-6 border p-4 rounded-lg shadow">
+                <div
+                  key={request.id}
+                  className="mb-6 border p-4 rounded-lg shadow"
+                >
                   <div className="flex justify-between items-center mb-4">
                     <div>
                       <button
                         className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2"
-                        onClick={() => handleLeaveRequestAction(request.id, "approved")}
+                        onClick={() =>
+                          handleLeaveRequestAction(request.id, "approved")
+                        }
                       >
                         <FaCheck className="inline mr-2" /> Approve
                       </button>
                       <button
                         className="bg-red-600 text-white px-4 py-2 rounded-lg"
-                        onClick={() => handleLeaveRequestAction(request.id, "declined")}
+                        onClick={() =>
+                          handleLeaveRequestAction(request.id, "declined")
+                        }
                       >
                         <FaTimes className="inline mr-2" /> Decline
                       </button>

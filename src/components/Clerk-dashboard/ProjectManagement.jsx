@@ -92,10 +92,14 @@ const ProjectManagement = () => {
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [clientName, setClientName] = useState("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   useEffect(() => {
     fetchProjects();
@@ -228,26 +232,24 @@ const ProjectManagement = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-      />
+    <div className="flex min-h-screen bg-gray-100 overflow-hidden">
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
       <div className="flex-1 flex flex-col">
         <header className="bg-white p-4 shadow-md flex items-center justify-between">
           <div className="flex items-center">
+            <button
+              onClick={toggleSidebar}
+              className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
+            >
+              <FaBars size={24} />
+            </button>
             <img
               src="https://www.saisamarthpolytech.com/images/logo.png"
               alt="Sai Samarth Polytech"
-              className="h-10 w-auto mr-4"
+              className="h-10 w-auto ml-4"
             />
           </div>
-          <button
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
-          >
-            <FaBars size={24} />
-          </button>
         </header>
 
         <main className="flex-1 flex flex-col items-center p-6">
@@ -258,7 +260,7 @@ const ProjectManagement = () => {
             <FaArrowLeft className="mr-2" /> Back to Projects
           </button>
 
-          <h2 className="text-3xl font-bold text-gray-800 mt-4 mb-6">
+          <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mt-4 mb-6 whitespace-nowrap overflow-hidden text-ellipsis">
             Projects for Client{" "}
             <span className="text-orange-600">{clientName || clientId}</span>
           </h2>

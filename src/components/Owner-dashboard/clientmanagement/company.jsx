@@ -35,26 +35,30 @@ const Company = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex h-screen bg-gray-100 font-poppins">
+      {/* Sidebar */}
       <Sidebar
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white p-4 shadow-md flex items-center justify-between">
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="bg-white/30 backdrop-blur-md p-4 shadow-md flex items-center justify-between">
           <div className="flex items-center">
+            <button
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
+            >
+              <FaBars size={24} />
+            </button>
             <img
               src="https://www.saisamarthpolytech.com/images/logo.png"
               alt="Sai Samarth Polytech"
-              className="h-10 w-auto mr-4"
+              className="h-10 w-auto ml-4"
             />
           </div>
-          <button
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
-          >
-            <FaBars size={24} />
-          </button>
         </header>
         <main className="flex-1 p-6 overflow-y-auto">
           <section className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">

@@ -277,78 +277,84 @@ const Revenuemanagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800">
-      <div className="flex">
-        <Sidebar
-          isMobileMenuOpen={isMobileMenuOpen}
-          setIsMobileMenuOpen={setIsMobileMenuOpen}
-        />
-        <main className="flex-1">
-          <header className="bg-white p-4 shadow-md flex items-center justify-between">
-            <img
-              src="https://www.saisamarthpolytech.com/images/logo.png"
-              alt="Sai Samarth Polytech"
-              className="h-10 w-auto"
-            />
+    <div className="flex min-h-screen bg-gray-100 font-poppins">
+      {/* Sidebar */}
+      <Sidebar
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="bg-white/30 backdrop-blur-md p-4 shadow-md flex items-center justify-between">
+          <div className="flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
               className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
             >
               <FaBars size={24} />
             </button>
-          </header>
-          <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
-            <p className="text-gray-600">
-              Welcome to the Revenue Management Dashboard.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {[
-                { title: "Clients", count: clientCount },
-                { title: "Projects", count: projectCount },
-                { title: "Projects in Progress", count: inProgressCount },
-                { title: "Clerks", count: clerkCount },
-                { title: "Employees", count: employeeCount },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-4 rounded-lg shadow-md text-center"
+            <img
+              src="https://www.saisamarthpolytech.com/images/logo.png"
+              alt="Sai Samarth Polytech"
+              className="h-10 w-auto ml-4"
+            />
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
+          <p className="text-gray-600">
+            Welcome to the Revenue Management Dashboard.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {[
+              { title: "Clients", count: clientCount },
+              { title: "Projects", count: projectCount },
+              { title: "Projects in Progress", count: inProgressCount },
+              { title: "Clerks", count: clerkCount },
+              { title: "Employees", count: employeeCount },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 rounded-lg shadow-md text-center"
+              >
+                <h3 className="text-lg font-semibold text-gray-700">
+                  {item.title}
+                </h3>
+                <p className="text-2xl font-bold text-black mt-2">
+                  {item.count}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-12">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-700">Monthly Sales</h3>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                  className="p-2 border rounded-lg bg-orange-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
-                  <h3 className="text-lg font-semibold text-gray-700">
-                    {item.title}
-                  </h3>
-                  <p className="text-2xl font-bold text-black mt-2">
-                    {item.count}
-                  </p>
-                </div>
-              ))}
+                  {[2023, 2024, 2025].map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Bar data={barData1} options={barOptions1} />
             </div>
-            <div className="space-y-12">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-700">Monthly Sales</h3>
-                  <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                    className="p-2 border rounded-lg bg-orange-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    {[2023, 2024, 2025].map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <Bar data={barData1} options={barOptions1} />
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <Bar data={barData2} options={barOptions2} />
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <Bar data={barData3} options={barOptions3} />
-              </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <Bar data={barData2} options={barOptions2} />
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <Bar data={barData3} options={barOptions3} />
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

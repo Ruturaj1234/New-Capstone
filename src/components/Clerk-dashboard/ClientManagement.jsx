@@ -124,17 +124,17 @@ const ClientManagement = () => {
 
       <div className="flex-1 flex flex-col">
         <header className="bg-white p-4 shadow-md flex items-center justify-between">
-          <button
-            onClick={toggleSidebar}
-            className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
-          >
-            <FaBars size={24} />
-          </button>
           <div className="flex items-center">
+            <button
+              onClick={toggleSidebar}
+              className="text-gray-700 hover:text-gray-900 focus:outline-none lg:hidden"
+            >
+              <FaBars size={24} />
+            </button>
             <img
               src="https://www.saisamarthpolytech.com/images/logo.png"
               alt="Sai Samarth Polytech"
-              className="h-10 w-auto mr-4"
+              className="h-10 w-auto ml-4"
             />
           </div>
         </header>

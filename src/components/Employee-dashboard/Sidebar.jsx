@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { X, LogOut } from "lucide-react";
+import { X, LogOut, User, Briefcase, FileText } from "lucide-react";
 
-const SidebarButton = ({ to, label, onClick }) => (
+const SidebarButton = ({ to, label, Icon }) => (
   <NavLink
     to={to}
-    onClick={onClick}
     className={({ isActive }) =>
       `flex items-center w-full px-4 py-3 mb-2 text-white hover:bg-gradient-to-r from-orange-500 to-orange-700 rounded-lg transition-transform transform hover:scale-105 duration-200 shadow-lg ${
         isActive ? "bg-gradient-to-r from-orange-500 to-orange-700" : ""
       }`
     }
   >
+    <Icon className="h-5 w-5 mr-3" />
     <span className="text-sm font-medium">{label}</span>
   </NavLink>
 );
@@ -32,23 +32,11 @@ const SidebarHeader = ({ onClose }) => (
   </div>
 );
 
-const SidebarContent = ({ onClose }) => (
+const SidebarContent = () => (
   <nav className="flex-1 px-4 py-6">
-    <SidebarButton
-      to="/personolinformation"
-      label="Personal Information"
-      onClick={onClose}
-    />
-    <SidebarButton
-      to="/assignedproject"
-      label="Assigned Projects"
-      onClick={onClose}
-    />
-    <SidebarButton
-      to="/leavesalary"
-      label="Salary Slip and Leave Management"
-      onClick={onClose}
-    />
+    <SidebarButton to="/personolinformation" label="Personal Info" Icon={User} />
+    <SidebarButton to="/assignedproject" label="Assigned Projects" Icon={Briefcase} />
+    <SidebarButton to="/leavesalary" label="Salary & Leave" Icon={FileText} />
   </nav>
 );
 
@@ -88,9 +76,9 @@ const Sidebar = ({ isOpen, onClose, onLogout }) => {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={onClose}
           />
-          <div className="fixed inset-y-0 left-0 w-72 h-screen transform transition-transform duration-300 ease-in-out bg-gradient-to-br from-orange-600 to-orange-800 shadow-2xl rounded-tr-xl rounded-br-xl flex flex-col">
+          <div className="fixed inset-y-0 left-0 w-72 h-screen bg-gradient-to-br from-orange-600 to-orange-800 shadow-2xl rounded-tr-xl rounded-br-xl flex flex-col">
             <SidebarHeader onClose={onClose} />
-            <SidebarContent onClose={onClose} />
+            <SidebarContent />
             <SidebarFooter onLogout={handleLogoutClick} />
           </div>
         </div>
@@ -99,7 +87,7 @@ const Sidebar = ({ isOpen, onClose, onLogout }) => {
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex flex-col w-72 h-full bg-gradient-to-br from-orange-600 to-orange-800 shadow-2xl rounded-tr-xl rounded-br-xl">
         <SidebarHeader onClose={() => {}} />
-        <SidebarContent onClose={() => {}} />
+        <SidebarContent />
         <SidebarFooter onLogout={handleLogoutClick} />
       </div>
 
@@ -107,22 +95,18 @@ const Sidebar = ({ isOpen, onClose, onLogout }) => {
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to logout?
-            </p>
+            <h3 className="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={cancelLogout}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmLogout}
-                className="px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
+                className="px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 transition duration-200"
               >
                 Logout
               </button>
