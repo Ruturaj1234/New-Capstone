@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaArrowLeft } from "react-icons/fa"; // Import the back arrow icon
+import { ChevronLeft, Save } from "lucide-react"; // Modern icons
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -12,22 +12,16 @@ const ProjectManagement = () => {
   const [allocatedEmployees, setAllocatedEmployees] = useState([]);
   const [employees, setEmployees] = useState([]);
 
-  // Test toast on component mount
-  useEffect(() => {
-  }, []);
-
-  // Fetch assigned companies
   useEffect(() => {
     fetch("http://localhost/login-backend/get_assigned_companies.php")
       .then((res) => res.json())
       .then((data) => setCompanies(data))
       .catch((err) => {
         console.error("Error fetching companies:", err);
-        toast.error("Failed to fetch companies. Please try again."); // Error toast
+        toast.error("Failed to fetch companies. Please try again.");
       });
   }, []);
 
-  // Fetch projects assigned to a selected company
   useEffect(() => {
     if (selectedCompany) {
       fetch(`http://localhost/login-backend/fetch_assigned_projects.php?client_id=${selectedCompany.id}`)
@@ -35,12 +29,11 @@ const ProjectManagement = () => {
         .then((data) => setProjects(data.projects || []))
         .catch((err) => {
           console.error("Error fetching projects:", err);
-          toast.error("Failed to fetch projects. Please try again."); // Error toast
+          toast.error("Failed to fetch projects. Please try again.");
         });
     }
   }, [selectedCompany]);
 
-  // Fetch employees from the `users` table and assigned employees for a selected project
   useEffect(() => {
     if (selectedProject) {
       fetch(`http://localhost/login-backend/fetch_assigned_employees.php?project_id=${selectedProject.id}`)
@@ -52,7 +45,7 @@ const ProjectManagement = () => {
         })
         .catch((err) => {
           console.error("Error fetching employees:", err);
-          toast.error("Failed to fetch employees. Please try again."); // Error toast
+          toast.error("Failed to fetch employees. Please try again.");
         });
     }
   }, [selectedProject]);
@@ -74,14 +67,14 @@ const ProjectManagement = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          toast.success("Project updated successfully!"); // Success toast
+          toast.success("Project updated successfully!");
         } else {
-          toast.error("Failed to update project."); // Error toast
+          toast.error("Failed to update project.");
         }
       })
       .catch((err) => {
         console.error("Error updating project:", err);
-        toast.error("Error updating project. Please try again."); // Error toast
+        toast.error("Error updating project. Please try again.");
       });
   };
 
@@ -90,26 +83,28 @@ const ProjectManagement = () => {
       {/* Back Navigation for Projects Section */}
       {selectedCompany && !selectedProject && (
         <button
-          onClick={() => setSelectedCompany(null)} // Go back to companies
-          className="flex items-center text-gray-700 hover:text-gray-900 mb-4"
+          onClick={() => setSelectedCompany(null)}
+          className="mb-4 bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-full shadow-md hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
         >
-          <FaArrowLeft className="mr-2" /> Back to Companies
+          <ChevronLeft size={16} />
+          Back to Companies
         </button>
       )}
 
       {/* Back Navigation for Manage Project Section */}
       {selectedProject && (
         <button
-          onClick={() => setSelectedProject(null)} // Go back to projects
-          className="flex items-center text-gray-700 hover:text-gray-900 mb-4"
+          onClick={() => setSelectedProject(null)}
+          className="mb-4 bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-full shadow-md hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
         >
-          <FaArrowLeft className="mr-2" /> Back to Projects
+          <ChevronLeft size={16} />
+          Back to Projects
         </button>
       )}
 
       {!selectedCompany ? (
         <div>
-          <h2 className="text-xl font-bold mb-4">Select a Company</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Select a Company</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {companies.map((company) => (
               <div
@@ -125,7 +120,7 @@ const ProjectManagement = () => {
         </div>
       ) : !selectedProject ? (
         <div>
-          <h2 className="text-xl font-bold mb-4">Select a Project</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Select a Project</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {projects.map((project) => (
               <div
@@ -141,12 +136,12 @@ const ProjectManagement = () => {
         </div>
       ) : (
         <div>
-          <h2 className="text-xl font-bold mb-4">Manage Project</h2>
-          <h3 className="text-lg font-bold mt-4">Update Project Leader</h3>
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Manage Project</h2>
+          <h3 className="text-lg font-semibold text-gray-700 mt-4">Update Project Leader</h3>
           <select
             value={projectLeader}
             onChange={(e) => setProjectLeader(e.target.value)}
-            className="border border-gray-300 p-2 rounded"
+            className="border border-gray-300 p-2 rounded w-full max-w-xs"
           >
             <option value="">Select Leader</option>
             {employees.map((emp) => (
@@ -158,7 +153,7 @@ const ProjectManagement = () => {
 
           {employees.map((employee) => (
             <div key={employee.employee_id} className="mb-2">
-              <label>
+              <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   value={employee.employee_id}
@@ -166,21 +161,21 @@ const ProjectManagement = () => {
                   onChange={(e) => {
                     const id = Number(employee.employee_id);
                     setAllocatedEmployees((prev) =>
-                      e.target.checked
-                        ? [...prev, id] // Add employee ID if checked
-                        : prev.filter((empId) => empId !== id) // Remove if unchecked
+                      e.target.checked ? [...prev, id] : prev.filter((empId) => empId !== id)
                     );
                   }}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded"
                 />
-                {employee.username}
+                <span className="text-gray-700">{employee.username}</span>
               </label>
             </div>
           ))}
 
           <button
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
             onClick={handleSubmitProject}
+            className="mt-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-full shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
           >
+            <Save size={16} />
             Submit
           </button>
         </div>

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { ChevronLeft, Plus, Download, Save, Trash2 } from "lucide-react"; // Modern icons
+
 
 const GenerateBill = () => {
   const { clientId, projectId } = useParams();
@@ -131,10 +133,13 @@ const GenerateBill = () => {
           <h4 className="text-lg font-semibold mb-2">Generate PDF</h4>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-green-500 text-white px-4 py-2 rounded"
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-full shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
           >
+                            <Download size={16} />
+            
             Generate PDF
           </button>
+          
         </div>
       </div>
 

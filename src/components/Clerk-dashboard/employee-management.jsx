@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaUsers,
-  FaTasks,
-  FaEnvelope,
-  FaClipboardList,
-  FaCheck,
-  FaTimes,
-} from "react-icons/fa";
+import { Check, X } from "lucide-react"; // Modern icons for buttons
+import { FaUsers, FaTasks, FaEnvelope, FaClipboardList } from "react-icons/fa"; // Icons for cards
 import EmployeeList from "./employee-list";
 import AssignWork from "./assign-work";
 import CurrentProjects from "./current-projects";
 import Sidebar from "./Sidebar";
 import { FaBars } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const EmployeeManagement = () => {
   const [leaveRequests, setLeaveRequests] = useState([]);
@@ -20,7 +16,6 @@ const EmployeeManagement = () => {
   const [showContent, setShowContent] = useState("employeeList");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Fetch leave requests from the backend
   useEffect(() => {
     fetchLeaveRequests();
   }, []);
@@ -41,7 +36,6 @@ const EmployeeManagement = () => {
       });
   };
 
-  // Handle approve or decline action
   const handleLeaveRequestAction = (id, status) => {
     fetch("http://localhost/login-backend/update_leave_status.php", {
       method: "POST",
@@ -65,7 +59,6 @@ const EmployeeManagement = () => {
       });
   };
 
-  // Filter only pending leave requests
   const pendingLeaveRequests = leaveRequests.filter(
     (request) => request.status === "pending"
   );
@@ -100,7 +93,6 @@ const EmployeeManagement = () => {
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-            {/* Employee List Section */}
             <div
               className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer"
               onClick={() => setShowContent("employeeList")}
@@ -116,7 +108,6 @@ const EmployeeManagement = () => {
               </p>
             </div>
 
-            {/* Assign Work Section */}
             <div
               className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer"
               onClick={() => setShowContent("assignWork")}
@@ -132,7 +123,6 @@ const EmployeeManagement = () => {
               </p>
             </div>
 
-            {/* Current Projects Section */}
             <div
               className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer"
               onClick={() => setShowContent("workingProjects")}
@@ -148,7 +138,6 @@ const EmployeeManagement = () => {
               </p>
             </div>
 
-            {/* Requests Section */}
             <div
               className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer"
               onClick={() => setShowContent("requests")}
@@ -174,14 +163,11 @@ const EmployeeManagement = () => {
           {/* Render content based on selection */}
           <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             {showContent === "employeeList" && <EmployeeList />}
-
             {showContent === "assignWork" && <AssignWork />}
-
             {showContent === "workingProjects" && <CurrentProjects />}
-
             {showContent === "requests" && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Leave Requests</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">Leave Requests</h2>
                 {pendingLeaveRequests.length > 0 ? (
                   pendingLeaveRequests.map((request) => (
                     <div
@@ -189,27 +175,28 @@ const EmployeeManagement = () => {
                       className="mb-6 border p-4 rounded-lg shadow"
                     >
                       <div className="flex justify-between items-center mb-4">
-                        <div>
+                        <div className="flex gap-2">
                           <button
-                            className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2"
+                            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-full shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
                             onClick={() =>
                               handleLeaveRequestAction(request.id, "approved")
                             }
                           >
-                            <FaCheck className="inline mr-2" /> Approve
+                            <Check size={16} />
+                            Approve
                           </button>
                           <button
-                            className="bg-red-600 text-white px-4 py-2 rounded-lg"
+                            className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-full shadow-md hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
                             onClick={() =>
                               handleLeaveRequestAction(request.id, "declined")
                             }
                           >
-                            <FaTimes className="inline mr-2" /> Decline
+                            <X size={16} />
+                            Decline
                           </button>
                         </div>
                       </div>
 
-                      {/* Display the request details */}
                       <div className="mb-2">
                         <strong>Employee Name:</strong> {request.employee_name}
                       </div>
@@ -251,9 +238,8 @@ const EmployeeManagement = () => {
       {showRequests && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl w-full">
-            <h2 className="text-xl font-semibold mb-4">Leave Requests</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Leave Requests</h2>
 
-            {/* Filter for pending leave requests */}
             {pendingLeaveRequests.length === 0 ? (
               <p className="text-center text-gray-600">No pending requests.</p>
             ) : (
@@ -263,27 +249,28 @@ const EmployeeManagement = () => {
                   className="mb-6 border p-4 rounded-lg shadow"
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <div>
+                    <div className="flex gap-2">
                       <button
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2"
+                        className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-full shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
                         onClick={() =>
                           handleLeaveRequestAction(request.id, "approved")
                         }
                       >
-                        <FaCheck className="inline mr-2" /> Approve
+                        <Check size={16} />
+                        Approve
                       </button>
                       <button
-                        className="bg-red-600 text-white px-4 py-2 rounded-lg"
+                        className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-full shadow-md hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
                         onClick={() =>
                           handleLeaveRequestAction(request.id, "declined")
                         }
                       >
-                        <FaTimes className="inline mr-2" /> Decline
+                        <X size={16} />
+                        Decline
                       </button>
                     </div>
                   </div>
 
-                  {/* Display the request details */}
                   <div className="mb-2">
                     <strong>Employee Name:</strong> {request.employee_name}
                   </div>
@@ -307,9 +294,10 @@ const EmployeeManagement = () => {
             )}
 
             <button
-              onClick={() => setShowRequests(false)} // Close the modal
-              className="mt-4 w-full bg-gray-500 text-white px-4 py-2 rounded"
+              onClick={() => setShowRequests(false)}
+              className="mt-4 w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-full shadow-md hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center justify-center gap-1 text-sm font-semibold"
             >
+              <X size={16} />
               Close
             </button>
           </div>

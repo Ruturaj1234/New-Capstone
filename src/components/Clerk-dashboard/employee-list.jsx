@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch } from "react-icons/fa"; // For the search icon
+import { FaSearch } from "react-icons/fa";
+import { ChevronLeft, DollarSign, EyeOff, Save } from "lucide-react"; // Modern icons
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
@@ -14,7 +15,7 @@ const EmployeeList = () => {
     salary_hra: "",
     salary_maintenance: "",
   });
-  const [searchQuery, setSearchQuery] = useState(""); // New state for search
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -24,7 +25,7 @@ const EmployeeList = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           setEmployees(data);
-          setFilteredEmployees(data); // Initially show all employees
+          setFilteredEmployees(data);
         } else {
           setError("Invalid data format received from the server.");
         }
@@ -36,11 +37,11 @@ const EmployeeList = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter employees based on search query
   useEffect(() => {
     const filtered = employees.filter((employee) =>
-      [employee.id.toString(), employee.name.toLowerCase(), employee.email?.toLowerCase() || ""]
-        .some((field) => field.includes(searchQuery.toLowerCase()))
+      [employee.id.toString(), employee.name.toLowerCase(), employee.email?.toLowerCase() || ""].some(
+        (field) => field.includes(searchQuery.toLowerCase())
+      )
     );
     setFilteredEmployees(filtered);
   }, [searchQuery, employees]);
@@ -140,17 +141,16 @@ const EmployeeList = () => {
       {!viewDetails ? (
         <div>
           <h3 className="text-2xl font-bold text-gray-800 mb-6">Employee List</h3>
-          {/* Search Bar aligned to the left */}
-<div className="relative max-w-md mb-6 ml-0">  
-  <input
-    type="text"
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    placeholder="Search by ID, Name, or Email..."
-    className="w-full py-3 pl-12 pr-4 bg-gradient-to-r from-gray-50 to-white text-gray-800 border-2 border-black-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
-  />
-  <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black-500 text-lg" />
-</div>
+          <div className="relative max-w-md mb-6 ml-0">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by ID, Name, or Email..."
+              className="w-full py-3 pl-12 pr-4 bg-gradient-to-r from-gray-50 to-white text-gray-800 border-2 border-black-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+            />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black-500 text-lg" />
+          </div>
 
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white border border-gray-200">
@@ -184,9 +184,10 @@ const EmployeeList = () => {
         <div>
           <button
             onClick={() => setViewDetails(false)}
-            className="mb-6 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm font-semibold"
+            className="mb-6 bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-full shadow-md hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
           >
-            ← Back to Employee List
+            <ChevronLeft size={16} />
+            Back to Employee List
           </button>
           {employeeDetails && (
             <div className="bg-white rounded-lg shadow-lg p-8">
@@ -270,8 +271,13 @@ const EmployeeList = () => {
               </div>
               <button
                 onClick={() => setIsSalaryFormVisible(!isSalaryFormVisible)}
-                className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-sm font-semibold"
+                className={`px-6 py-3 text-white rounded-full shadow-md transition-all duration-300 flex items-center gap-1 text-sm font-semibold ${
+                  isSalaryFormVisible
+                    ? "bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700"
+                    : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                }`}
               >
+                {isSalaryFormVisible ? <EyeOff size={16} /> : <DollarSign size={16} />}
                 {isSalaryFormVisible ? "Hide Salary Form" : "Set Salary"}
               </button>
               {isSalaryFormVisible && (
@@ -294,8 +300,9 @@ const EmployeeList = () => {
                   </div>
                   <button
                     onClick={handleSalarySubmit}
-                    className="mt-6 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm font-semibold"
+                    className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
                   >
+                    <Save size={16} />
                     Save Salary
                   </button>
                 </div>

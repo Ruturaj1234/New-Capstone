@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
-import logoImage from "/image.png"; // Adjusted to root of public folder
+import { ChevronLeft, Download } from "lucide-react"; // Modern icons
+import logoImage from "/image.png"; // Adjust path as needed
 
 const TrackRecords = ({ onClose }) => {
   const { clientId, projectId } = useParams();
@@ -18,7 +18,7 @@ const TrackRecords = ({ onClose }) => {
     date_completed: "",
     summary_work_completed: "",
     next_steps: "",
-    estimated_completion_date: ""
+    estimated_completion_date: "",
   });
 
   useEffect(() => {
@@ -41,13 +41,12 @@ const TrackRecords = ({ onClose }) => {
     fetchTrackRecords();
   }, [projectId]);
 
-  const progressBarColor = trackRecords.progress_percentage === 100 ? "bg-green-500" : "bg-blue-500";
-  
-  const displayDate = trackRecords.status === "Completed" && trackRecords.date_completed
-    ? new Date(trackRecords.date_completed).toLocaleDateString()
-    : trackRecords.status === "In Progress" && trackRecords.created_at
-    ? new Date(trackRecords.created_at).toLocaleString()
-    : "N/A";
+  const displayDate =
+    trackRecords.status === "Completed" && trackRecords.date_completed
+      ? new Date(trackRecords.date_completed).toLocaleDateString()
+      : trackRecords.status === "In Progress" && trackRecords.created_at
+      ? new Date(trackRecords.created_at).toLocaleString()
+      : "N/A";
 
   const estimatedCompletionDate = trackRecords.estimated_completion_date
     ? new Date(trackRecords.estimated_completion_date).toLocaleDateString()
@@ -73,16 +72,19 @@ const TrackRecords = ({ onClose }) => {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, img.width, img.height);
     const imgData = canvas.toDataURL("image/png");
-    doc.addImage(imgData, "PNG", 20, 10, 60, 30); // Logo at top-left
+    doc.addImage(imgData, "PNG", 20, 10, 60, 30);
 
     // Header Table
     doc.autoTable({
       head: [["SaiSamarth Polytech Pvt. Ltd.", ""]],
       body: [
         ["Project ID", projectId],
-        ["Client ID", clientId],
+        ["Client程度上ID", clientId],
         ["Status", trackRecords.status],
-        [trackRecords.status === "Completed" ? "Completion Date" : "Last Report Date", displayDate]
+        [
+          trackRecords.status === "Completed" ? "Completion Date" : "Last Report Date",
+          displayDate,
+        ],
       ],
       theme: "grid",
       margin: { top: 50 },
@@ -100,7 +102,7 @@ const TrackRecords = ({ onClose }) => {
         ["Progress Percentage", `${trackRecords.progress_percentage}%`],
         ["Summary of Work Completed", trackRecords.summary_work_completed || "N/A"],
         ["Next Steps", trackRecords.next_steps || "N/A"],
-        ["Estimated Completion Date", estimatedCompletionDate]
+        ["Estimated Completion Date", estimatedCompletionDate],
       ],
       theme: "grid",
       styles: { fontSize: 12, halign: "left", cellPadding: 3 },
@@ -112,8 +114,8 @@ const TrackRecords = ({ onClose }) => {
     const images = [
       { src: trackRecords.image, label: "Image 1" },
       { src: trackRecords.image2, label: "Image 2" },
-      { src: trackRecords.image3, label: "Image 3" }
-    ].filter(img => img.src);
+      { src: trackRecords.image3, label: "Image 3" },
+    ].filter((img) => img.src);
 
     if (images.length > 0) {
       let currentY = doc.lastAutoTable.finalY + 10;
@@ -122,9 +124,9 @@ const TrackRecords = ({ onClose }) => {
 
       for (const img of images) {
         try {
-          const response = await fetch(`http://localhost/login-backend/get_image.php?path=${img.src}`, {
-            mode: 'cors',
-            credentials: 'same-origin'
+          const response = await fetch(`http://localhost/login-backend/${img.src}`, {
+            mode: "cors",
+            credentials: "same-origin",
           });
           if (!response.ok) throw new Error(`Failed to fetch ${img.label}: ${response.statusText}`);
           const imgBlob = await response.blob();
@@ -150,21 +152,20 @@ const TrackRecords = ({ onClose }) => {
       }
     }
 
-    // Save PDF
     doc.save(`TrackRecord_${projectId}.pdf`);
   };
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl mt-6">
       <header className="flex items-center justify-between mb-4">
-        <button onClick={() => onClose()} className="text-gray-700">
-          ← Back
-        </button>
-        <h2 className="text-2xl font-bold mx-auto">Track Records</h2>
+      <button onClick={() => navigate(-1)} className="text-gray-700 font-semibold">
+            &larr; Back
+          </button>
+        <h2 className="text-2xl font-bold mx-auto text-gray-800">Track Records</h2>
       </header>
 
       <div className="mb-6">
-        <h3 className="text-xl font-semibold">
+        <h3 className="text-xl font-semibold text-gray-700">
           Project ID: <span className="text-gray-600">{projectId}</span>
         </h3>
         <h4 className="text-lg text-gray-500">Client ID: {clientId}</h4>
@@ -172,23 +173,34 @@ const TrackRecords = ({ onClose }) => {
 
       <div className="border-t border-gray-200 pt-4">
         <div className="flex justify-between items-center mb-4">
-          <h4 className="text-lg font-semibold">Project Status</h4>
+          <h4 className="text-lg font-semibold text-gray-700">Project Status</h4>
           <button
             onClick={handleDownloadReport}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-full shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
           >
+            <Download size={16} />
             Download Report
           </button>
         </div>
         <div className="space-y-4">
           <p>
             <strong>Status:</strong>{" "}
-            <span className={`font-medium ${trackRecords.status === "Completed" ? "text-green-600" : trackRecords.status === "In Progress" ? "text-blue-600" : "text-gray-600"}`}>
+            <span
+              className={`font-medium ${
+                trackRecords.status === "Completed"
+                  ? "text-green-600"
+                  : trackRecords.status === "In Progress"
+                  ? "text-blue-600"
+                  : "text-gray-600"
+              }`}
+            >
               {trackRecords.status}
             </span>
           </p>
           <p>
-            <strong>{trackRecords.status === "Completed" ? "Completion Date" : "Last Report Date"}:</strong>{" "}
+            <strong>
+              {trackRecords.status === "Completed" ? "Completion Date" : "Last Report Date"}:
+            </strong>{" "}
             <span className="text-gray-600">{displayDate}</span>
           </p>
           <p>
@@ -198,13 +210,19 @@ const TrackRecords = ({ onClose }) => {
           <div>
             <strong>Progress Percentage:</strong>
             <div className="flex items-center mt-2">
-              <div className="w-full bg-gray-200 rounded-full h-4">
+              <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
                 <div
-                  className={`${progressBarColor} h-4 rounded-full`}
+                  className={`h-4 rounded-full transition-all duration-500 ${
+                    trackRecords.progress_percentage === 100
+                      ? "bg-gradient-to-r from-green-400 to-green-600"
+                      : "bg-gradient-to-r from-blue-400 to-blue-600"
+                  }`}
                   style={{ width: `${trackRecords.progress_percentage}%` }}
                 ></div>
               </div>
-              <span className="ml-4 text-gray-800 font-medium">{trackRecords.progress_percentage}%</span>
+              <span className="ml-4 text-gray-800 font-medium">
+                {trackRecords.progress_percentage}%
+              </span>
             </div>
           </div>
           <p>

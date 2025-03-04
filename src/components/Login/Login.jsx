@@ -1,157 +1,211 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa"; // Added FaEye and FaEyeSlash
+import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // For password visibility toggle
-  const [isLoading, setIsLoading] = useState(false); // For loading state
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading state to true
+    setIsLoading(true);
+    setMessage("");
 
     try {
       const response = await fetch("http://localhost/login-backend/login.php", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Network response was not ok");
+        throw new Error(errorData.message || "Network error");
       }
 
       const data = await response.json();
-      setMessage(data.message);
+      console.log("Login response:", data);
 
       if (data.success) {
-        switch (data.role) {
-          case "owner":
-            navigate("/owner-dashboard");
-            break;
-          case "employee":
-            navigate("/employee-dashboard");
-            break;
-          case "clerk":
-            navigate("/clerk-dashboard");
-            break;
-          default:
-            setMessage("Unknown role. Please contact support.");
-        }
+        setMessage(data.message || "Login successful!");
+        const routes = {
+          owner: "/owner-dashboard",
+          employee: "/employee-dashboard",
+          clerk: "/clerk-dashboard",
+        };
+        navigate(routes[data.role] || "/");
       } else {
-        setMessage("Invalid username or password. Please try again.");
+        setMessage(data.message || "Invalid credentials.");
       }
     } catch (error) {
       setMessage("An error occurred: " + error.message);
-      console.error("Error:", error);
+      console.error("Login error:", error);
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-200 via-orange-300 to-orange-400 px-4 lg:px-8 animate-gradient bg-noise font-inter">
-      <div className="bg-white/30 p-6 md:p-10 lg:p-12 rounded-3xl shadow-2xl w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl transform transition duration-500 hover:scale-105 border border-white/20 animate-fade-in-up">
-        {/* Company Branding */}
-        <div className="flex flex-col items-center mb-8">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-orange-500 tracking-wider font-poppins">
+    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-600 via-orange-500 to-orange-400 p-6 overflow-hidden">
+      {/* Moving Background Text */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+        <div className="flex flex-col items-center gap-2"> {/* Reduced gap for tighter spacing */}
+          <div className="text-white text-6xl font-bold uppercase tracking-wider animate-move-right-to-left hover:animate-move-right-to-left-slow pointer-events-auto whitespace-nowrap">
             Saisamarth Polytech
-          </h1>
-          <p className="text-sm lg:text-base text-gray-600 mt-2 font-inter">
-            Empowering Innovation Through Technology
-          </p>
+          </div>
+          <div className="w-[600px] h-1 bg-white/70"></div> {/* Thin, visible line */}
+          <div className="text-white text-6xl font-bold uppercase tracking-wider animate-move-left-to-right hover:animate-move-left-to-right-slow pointer-events-auto whitespace-nowrap">
+            Saisamarth Polytech
+          </div>
+        </div>
+      </div>
+
+      {/* White Glassmorphism Card */}
+      <div className="relative bg-white/70 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full max-w-lg border border-white/40 transform transition-all duration-500 hover:shadow-3xl hover:scale-[1.02] z-10">
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <img
+            src="https://www.saisamarthpolytech.com/images/logo.png"
+            alt="Sai Samarth Polytech"
+            className="h-14 w-auto transition-transform duration-300 hover:scale-110"
+          />
         </div>
 
-        <h2 className="text-lg sm:text-xl lg:text-2xl font-medium text-center text-gray-700 mb-6 font-poppins">
-          Welcome Back! Please Log In
+        {/* Welcome Text */}
+        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4 tracking-wide">
+
         </h2>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Username Field with Floating Label */}
           <div className="relative">
+            <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              autoFocus
-              aria-label="Username"
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:outline-none shadow-sm transition duration-300 hover:border-orange-400 peer text-base lg:text-lg font-inter"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border-none bg-white/50 text-gray-900 focus:ring-2 focus:ring-orange-400 focus:outline-none transition-all duration-300 peer"
             />
-            <label className="absolute left-10 top-3 text-gray-400 transition-all duration-300 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-orange-500 bg-white px-1 peer-focus:px-2 font-inter">
+            <label
+              className={`absolute left-10 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 peer-focus:-top-0 peer-focus:text-sm peer-focus:text-orange-600 peer-focus:bg-white/50 peer-focus:px-1 ${
+                username ? "-top-0 text-sm text-orange-600 bg-white/50 px-1" : ""
+              }`}
+            >
               Username
             </label>
-            <FaUser className="absolute left-3 top-4 text-gray-400 text-lg lg:text-xl" />
           </div>
 
-          {/* Password Field with Toggle and Floating Label */}
+          {/* Password Field with Floating Label */}
           <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              aria-label="Password"
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:outline-none shadow-sm transition duration-300 hover:border-orange-400 peer text-base lg:text-lg font-inter"
+              className="w-full pl-10 pr-12 py-3 rounded-lg border-none bg-white/50 text-gray-900 focus:ring-2 focus:ring-orange-400 focus:outline-none transition-all duration-300 peer"
             />
-            <label className="absolute left-10 top-3 text-gray-400 transition-all duration-300 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-orange-500 bg-white px-1 peer-focus:px-2 font-inter">
+            <label
+              className={`absolute left-10 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 peer-focus:-top-0 peer-focus:text-sm peer-focus:text-orange-600 peer-focus:bg-white/50 peer-focus:px-1 ${
+                password ? "-top-0 text-sm text-orange-600 bg-white/50 px-1" : ""
+              }`}
+            >
               Password
             </label>
-            <FaLock className="absolute left-3 top-4 text-gray-400 text-lg lg:text-xl" />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-4 text-gray-400 hover:text-gray-600 text-lg lg:text-xl"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-orange-400 transition-colors duration-200"
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
 
-          {/* Submit Button with Loading State */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 lg:py-4 text-white font-semibold rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 shadow-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-base lg:text-lg font-inter"
+            className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-lg shadow-lg hover:from-orange-600 hover:to-orange-700 focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isLoading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-2 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              "Log In"
+              "Login"
             )}
           </button>
         </form>
 
-        {/* Footer with Legal Text */}
-        <div className="mt-6 text-center text-sm lg:text-base text-gray-600 font-inter">
-          By logging in, you agree to our{" "}
-          <Link href="/terms" className="text-orange-500 hover:text-orange-600">
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link
-            href="/privacy"
-            className="text-orange-500 hover:text-orange-600"
-          >
-            Privacy Policy
-          </Link>
-          .
+        {/* Legal Links */}
+        <div className="mt-6 text-center text-sm text-gray-700">
+          <p>
+            By signing in, you agree to our{" "}
+            <Link to="/terms" className="text-orange-600 hover:text-orange-700 font-medium">
+              Terms
+            </Link>{" "}
+            &{" "}
+            <Link to="/privacy" className="text-orange-600 hover:text-orange-700 font-medium">
+              Privacy Policy
+            </Link>
+          </p>
         </div>
 
-        {/* Error/Success Message */}
+        {/* Message */}
         {message && (
-          <p className="mt-4 text-center text-red-500 font-medium text-base lg:text-lg font-inter">
+          <p
+            className={`mt-4 text-center text-sm font-medium ${
+              message.includes("success") ? "text-green-600" : "text-red-600"
+            }`}
+          >
             {message}
           </p>
         )}
       </div>
+
+      {/* CSS for Moving Text with Dynamic Speed */}
+      <style jsx>{`
+        @keyframes move-right-to-left {
+          0% { transform: translateX(100vw); }
+          20% { transform: translateX(50vw); } /* Slow entry */
+          80% { transform: translateX(-50vw); } /* Fast middle */
+          100% { transform: translateX(-100vw); } /* Slow exit */
+        }
+        @keyframes move-left-to-right {
+          0% { transform: translateX(-100vw); }
+          20% { transform: translateX(-50vw); } /* Slow entry */
+          80% { transform: translateX(50vw); } /* Fast middle */
+          100% { transform: translateX(100vw); } /* Slow exit */
+        }
+        @keyframes move-right-to-left-slow {
+          0% { transform: translateX(100vw); }
+          20% { transform: translateX(50vw); }
+          80% { transform: translateX(-50vw); }
+          100% { transform: translateX(-100vw); }
+        }
+        @keyframes move-left-to-right-slow {
+          0% { transform: translateX(-100vw); }
+          20% { transform: translateX(-50vw); }
+          80% { transform: translateX(50vw); }
+          100% { transform: translateX(100vw); }
+        }
+        .animate-move-right-to-left {
+          animation: move-right-to-left 10s ease infinite;
+        }
+        .animate-move-left-to-right {
+          animation: move-left-to-right 10s ease infinite;
+        }
+        .hover\:animate-move-right-to-left-slow:hover {
+          animation: move-right-to-left-slow 20s ease infinite;
+        }
+        .hover\:animate-move-left-to-right-slow:hover {
+          animation: move-left-to-right-slow 20s ease infinite;
+        }
+      `}</style>
     </div>
   );
 };

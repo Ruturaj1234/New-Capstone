@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ChevronLeft, FileText, CheckCircle } from "lucide-react"; // Modern icons
 
 const AssignWork = () => {
   const [companies, setCompanies] = useState([]);
@@ -12,7 +13,6 @@ const AssignWork = () => {
   const [noProjectsMessage, setNoProjectsMessage] = useState("");
   const [step, setStep] = useState("company"); // 'company', 'project', or 'employee'
 
-  // Fetch companies (from projects table)
   useEffect(() => {
     fetch("http://localhost/login-backend/get_companies.php")
       .then((response) => response.json())
@@ -20,7 +20,6 @@ const AssignWork = () => {
       .catch((error) => console.error("Error fetching companies:", error));
   }, []);
 
-  // Fetch employee names
   useEffect(() => {
     fetch("http://localhost/login-backend/fetchemployees.php")
       .then((response) => response.json())
@@ -36,11 +35,10 @@ const AssignWork = () => {
 
   const handleCompanySelect = (company) => {
     setSelectedCompany(company);
-    setStep("project"); // Navigate to project step
+    setStep("project");
     setSelectedProject(null);
     setSelectedEmployees([]);
 
-    // Fetch projects for the selected company
     fetch(`http://localhost/login-backend/get_client_projects.php?client_id=${company.id}`)
       .then((response) => response.json())
       .then((data) => {
@@ -56,32 +54,28 @@ const AssignWork = () => {
   };
 
   const handleProjectSelect = (project) => {
-    // Ensure the project object has a client_id and project_name before sending the request
     if (!selectedCompany || !project.project_name) {
       alert("Missing company or project data");
       return;
     }
 
-    // Check if the selected project is already assigned
     fetch("http://localhost/login-backend/check_project.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        client_id: selectedCompany.id, // Ensure the company ID is sent
-        project_name: project.project_name, // Ensure the project name is sent
+        client_id: selectedCompany.id,
+        project_name: project.project_name,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "exists") {
-          // If the project is already assigned, show an alert
           alert("This project is already assigned.");
         } else {
-          // If the project is not assigned, proceed with the selection
           setSelectedProject(project);
-          setStep("employee"); // Navigate to employee step
+          setStep("employee");
         }
       })
       .catch((error) => {
@@ -98,12 +92,11 @@ const AssignWork = () => {
   const handleAssign = () => {
     const data = {
       project_id: selectedProject.id,
-      employee_ids: selectedEmployees, // Pass the entire array of selected employee IDs
+      employee_ids: selectedEmployees,
       project_leader: projectLeader,
       message: message,
     };
 
-    // Send the data to the PHP backend using fetch
     fetch("http://localhost/login-backend/assign_project.php", {
       method: "POST",
       headers: {
@@ -115,8 +108,6 @@ const AssignWork = () => {
       .then((result) => {
         if (result.success) {
           alert(`Project "${selectedProject.project_name}" assigned successfully!`);
-
-          // Reset states after successful assignment
           setStep("company");
           setSelectedCompany(null);
           setSelectedProject(null);
@@ -139,9 +130,10 @@ const AssignWork = () => {
       {step !== "company" && (
         <button
           onClick={handleBack}
-          className="font-semibold mb-6 transition-colors duration-200"
+          className="mb-6 bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-full shadow-md hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
         >
-          ← Back
+          <ChevronLeft size={16} />
+          Back
         </button>
       )}
 
@@ -180,8 +172,9 @@ const AssignWork = () => {
                 <button
                   key={project.id}
                   onClick={() => handleProjectSelect(project)}
-                  className="bg-gray-50 px-6 py-3 rounded-lg transition-all hover:bg-gray-100 duration-200 font-semibold text-gray-800"
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-3 rounded-full shadow-md hover:from-teal-600 hover:to-teal-700 transition-all duration-300 flex items-center justify-center gap-2 text-sm font-semibold"
                 >
+                  <FileText size={16} />
                   {project.project_name}
                 </button>
               ))}
@@ -256,8 +249,9 @@ const AssignWork = () => {
 
           <button
             onClick={handleAssign}
-            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-200"
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
           >
+            <CheckCircle size={16} />
             Assign Project
           </button>
         </div>

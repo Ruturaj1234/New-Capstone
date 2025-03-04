@@ -34,8 +34,11 @@ const QuotationInfo = () => {
 
   useEffect(() => {
     if (company) {
-      // Fetch clientId by client_name
-      fetch(`http://localhost/login-backend/Owner-management/getClientId.php?client_name=${encodeURIComponent(company)}`)
+      fetch(
+        `http://localhost/login-backend/Owner-management/getClientId.php?client_name=${encodeURIComponent(
+          company
+        )}`
+      )
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
@@ -52,7 +55,9 @@ const QuotationInfo = () => {
     }
 
     if (projectId) {
-      fetch(`http://localhost/login-backend/Owner-management/getProjectById.php?id=${projectId}`)
+      fetch(
+        `http://localhost/login-backend/Owner-management/getProjectById.php?id=${projectId}`
+      )
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
@@ -112,7 +117,9 @@ const QuotationInfo = () => {
           alert("Failed to download bill PDF.");
         });
     } else if (type === "track") {
-      fetch(`http://localhost/login-backend/get_track_records.php?project_id=${projectId}`)
+      fetch(
+        `http://localhost/login-backend/get_track_records.php?project_id=${projectId}`
+      )
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
@@ -150,7 +157,11 @@ const QuotationInfo = () => {
       body: [[company, projectData.project_name, new Date().toLocaleDateString()]],
       theme: "grid",
       styles: { fontSize: 12, halign: "left" },
-      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.5 },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
       bodyStyles: { lineWidth: 0.5 },
     });
 
@@ -167,11 +178,18 @@ const QuotationInfo = () => {
       ]),
       theme: "grid",
       styles: { fontSize: 12, halign: "center" },
-      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.5 },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
       bodyStyles: { lineWidth: 0.5 },
     });
 
-    const taxableValue = quotation.items.reduce((sum, item) => sum + Number(item.amount), 0);
+    const taxableValue = quotation.items.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    );
     const igst = taxableValue * 0.18;
     const grandTotal = taxableValue + igst;
 
@@ -185,7 +203,11 @@ const QuotationInfo = () => {
       ],
       theme: "grid",
       styles: { fontSize: 12, halign: "left" },
-      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.5 },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
       bodyStyles: { lineWidth: 0.5 },
     });
 
@@ -215,14 +237,26 @@ const QuotationInfo = () => {
       ],
       theme: "grid",
       margin: { top: 20 },
-      styles: { fontSize: 12, fontStyle: "bold", halign: "left", cellPadding: 3 },
-      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.5 },
+      styles: {
+        fontSize: 12,
+        fontStyle: "bold",
+        halign: "left",
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
       bodyStyles: { lineWidth: 0.5 },
     });
 
     let taxableValue = 0;
     billData.items.forEach((quotation) => {
-      taxableValue += quotation.items.reduce((subTotal, item) => subTotal + Number(item.total), 0);
+      taxableValue += quotation.items.reduce(
+        (subTotal, item) => subTotal + Number(item.total),
+        0
+      );
     });
     const igst = taxableValue * 0.18;
     const grandTotal = taxableValue + igst;
@@ -241,8 +275,17 @@ const QuotationInfo = () => {
         ])
       ),
       theme: "grid",
-      styles: { fontSize: 12, fontStyle: "bold", halign: "center", cellPadding: 3 },
-      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.5 },
+      styles: {
+        fontSize: 12,
+        fontStyle: "bold",
+        halign: "center",
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
       bodyStyles: { lineWidth: 0.5 },
     });
 
@@ -255,8 +298,17 @@ const QuotationInfo = () => {
         ["Grand Total", `${grandTotal.toFixed(2)}`],
       ],
       theme: "grid",
-      styles: { fontSize: 12, fontStyle: "bold", halign: "left", cellPadding: 3 },
-      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.5 },
+      styles: {
+        fontSize: 12,
+        fontStyle: "bold",
+        halign: "left",
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
       bodyStyles: { lineWidth: 0.5 },
     });
 
@@ -267,7 +319,12 @@ const QuotationInfo = () => {
         ["", "Director"],
       ],
       theme: "grid",
-      styles: { fontSize: 12, fontStyle: "bold", halign: "left", cellPadding: 3 },
+      styles: {
+        fontSize: 12,
+        fontStyle: "bold",
+        halign: "left",
+        cellPadding: 3,
+      },
       bodyStyles: { lineWidth: 0.5 },
     });
 
@@ -287,31 +344,47 @@ const QuotationInfo = () => {
       head: [["Field", "Details"]],
       body: [
         ["Status", trackRecords.status],
-        [trackRecords.status === "Completed" ? "Completion Date" : "Last Report Date", 
+        [
+          trackRecords.status === "Completed"
+            ? "Completion Date"
+            : "Last Report Date",
           trackRecords.status === "Completed" && trackRecords.date_completed
             ? new Date(trackRecords.date_completed).toLocaleDateString()
             : trackRecords.status === "In Progress" && trackRecords.created_at
             ? new Date(trackRecords.created_at).toLocaleString()
-            : "N/A"],
+            : "N/A",
+        ],
         ["Challenges", trackRecords.challenges || "N/A"],
         ["Progress Percentage", `${trackRecords.progress_percentage}%`],
-        ["Summary of Work Completed", trackRecords.summary_work_completed || "N/A"],
+        [
+          "Summary of Work Completed",
+          trackRecords.summary_work_completed || "N/A",
+        ],
         ["Next Steps", trackRecords.next_steps || "N/A"],
-        ["Estimated Completion Date", trackRecords.estimated_completion_date
-          ? new Date(trackRecords.estimated_completion_date).toLocaleDateString()
-          : "N/A"]
+        [
+          "Estimated Completion Date",
+          trackRecords.estimated_completion_date
+            ? new Date(
+                trackRecords.estimated_completion_date
+              ).toLocaleDateString()
+            : "N/A",
+        ],
       ],
       theme: "grid",
       styles: { fontSize: 12, halign: "left", cellPadding: 3 },
-      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.5 },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
       bodyStyles: { lineWidth: 0.5 },
     });
 
     const images = [
       { src: trackRecords.image, label: "Image 1" },
       { src: trackRecords.image2, label: "Image 2" },
-      { src: trackRecords.image3, label: "Image 3" }
-    ].filter(img => img.src);
+      { src: trackRecords.image3, label: "Image 3" },
+    ].filter((img) => img.src);
 
     if (images.length > 0) {
       let currentY = doc.lastAutoTable.finalY + 10;
@@ -320,10 +393,13 @@ const QuotationInfo = () => {
 
       for (const img of images) {
         try {
-          const response = await fetch(`http://localhost/login-backend/get_image.php?path=${img.src}`, {
-            mode: 'cors',
-            credentials: 'same-origin'
-          });
+          const response = await fetch(
+            `http://localhost/login-backend/get_image.php?path=${img.src}`,
+            {
+              mode: "cors",
+              credentials: "same-origin",
+            }
+          );
           if (!response.ok) throw new Error(`Failed to fetch ${img.label}`);
           const imgBlob = await response.blob();
           const imgUrl = URL.createObjectURL(imgBlob);
@@ -369,7 +445,8 @@ const QuotationInfo = () => {
           Document Management System
         </h1>
         <p className="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
-          Manage and download your documents, including quotations, bills, and track records.
+          Manage and download your documents, including quotations, bills, and
+          track records.
         </p>
 
         <div className="bg-white rounded-3xl shadow-xl border border-gray-200 w-full max-w-4xl mx-auto">
@@ -447,44 +524,108 @@ const QuotationInfo = () => {
 
             {showTrackRecords && trackRecords && (
               <div className="mt-6 bg-gray-50 p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Track Project Progress</h3>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  Track Project Progress
+                </h3>
                 <div className="space-y-4">
-                  <p><strong>Status:</strong> {trackRecords.status}</p>
-                  <p><strong>{trackRecords.status === "Completed" ? "Completion Date" : "Last Report Date"}:</strong> 
-                    {trackRecords.status === "Completed" && trackRecords.date_completed
-                      ? new Date(trackRecords.date_completed).toLocaleDateString()
-                      : trackRecords.status === "In Progress" && trackRecords.created_at
+                  <p>
+                    <strong>Status:</strong> {trackRecords.status}
+                  </p>
+                  <p>
+                    <strong>
+                      {trackRecords.status === "Completed"
+                        ? "Completion Date"
+                        : "Last Report Date"}
+                      :
+                    </strong>{" "}
+                    {trackRecords.status === "Completed" &&
+                    trackRecords.date_completed
+                      ? new Date(
+                          trackRecords.date_completed
+                        ).toLocaleDateString()
+                      : trackRecords.status === "In Progress" &&
+                        trackRecords.created_at
                       ? new Date(trackRecords.created_at).toLocaleString()
                       : "N/A"}
                   </p>
-                  <p><strong>Challenges:</strong> {trackRecords.challenges || "N/A"}</p>
-                  <p><strong>Progress Percentage:</strong> {trackRecords.progress_percentage}%</p>
-                  <p><strong>Summary of Work Completed:</strong> {trackRecords.summary_work_completed || "N/A"}</p>
-                  <p><strong>Next Steps:</strong> {trackRecords.next_steps || "N/A"}</p>
-                  <p><strong>Estimated Completion Date:</strong> 
+                  <p>
+                    <strong>Challenges:</strong>{" "}
+                    {trackRecords.challenges || "N/A"}
+                  </p>
+                  <div>
+                    <strong>Progress Percentage:</strong>
+                    <div className="flex items-center mt-2">
+                      <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                        <div
+                          className={`h-4 rounded-full transition-all duration-500 ${
+                            trackRecords.status === "Completed"
+                              ? "bg-gradient-to-r from-green-400 to-green-600"
+                              : "bg-gradient-to-r from-orange-400 to-orange-600"
+                          }`}
+                          style={{
+                            width: `${trackRecords.progress_percentage}%`,
+                          }}
+                        ></div>
+                      </div>
+                      <span className="ml-4 text-gray-800 font-medium">
+                        {trackRecords.progress_percentage}%
+                      </span>
+                    </div>
+                  </div>
+                  <p>
+                    <strong>Summary of Work Completed:</strong>{" "}
+                    {trackRecords.summary_work_completed || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Next Steps:</strong>{" "}
+                    {trackRecords.next_steps || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Estimated Completion Date:</strong>{" "}
                     {trackRecords.estimated_completion_date
-                      ? new Date(trackRecords.estimated_completion_date).toLocaleDateString()
+                      ? new Date(
+                          trackRecords.estimated_completion_date
+                        ).toLocaleDateString()
                       : "N/A"}
                   </p>
                   <div>
                     <strong>Images:</strong>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-                      {trackRecords.image && <img src={`http://localhost/login-backend/${trackRecords.image}`} alt="Image 1" className="max-w-full h-auto rounded-lg shadow-md" />}
-                      {trackRecords.image2 && <img src={`http://localhost/login-backend/${trackRecords.image2}`} alt="Image 2" className="max-w-full h-auto rounded-lg shadow-md" />}
-                      {trackRecords.image3 && <img src={`http://localhost/login-backend/${trackRecords.image3}`} alt="Image 3" className="max-w-full h-auto rounded-lg shadow-md" />}
+                      {trackRecords.image && (
+                        <img
+                          src={`http://localhost/login-backend/${trackRecords.image}`}
+                          alt="Image 1"
+                          className="max-w-full h-auto rounded-lg shadow-md"
+                        />
+                      )}
+                      {trackRecords.image2 && (
+                        <img
+                          src={`http://localhost/login-backend/${trackRecords.image2}`}
+                          alt="Image 2"
+                          className="max-w-full h-auto rounded-lg shadow-md"
+                        />
+                      )}
+                      {trackRecords.image3 && (
+                        <img
+                          src={`http://localhost/login-backend/${trackRecords.image3}`}
+                          alt="Image 3"
+                          className="max-w-full h-auto rounded-lg shadow-md"
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="mt-4 flex space-x-4">
                   <button
                     onClick={handleDownloadTrackRecord}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-full shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
                   >
+                    <Download size={16} />
                     Download Track Record
                   </button>
                   <button
                     onClick={() => setShowTrackRecords(false)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200"
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-full shadow-md hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-1 text-sm font-semibold"
                   >
                     Close
                   </button>
