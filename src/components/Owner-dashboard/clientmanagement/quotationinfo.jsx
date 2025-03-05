@@ -146,84 +146,96 @@ const QuotationInfo = () => {
 
   const generateQuotationPDF = (quotation) => {
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("SaiSamarth Polytech Pvt. Ltd.", 15, 15);
-    doc.setFontSize(14);
-    doc.text(`Quotation for ${projectData.project_name}`, 15, 25);
+    const imageUrl = "/public/image.png";
+    const img = new Image();
+    img.src = imageUrl;
 
-    doc.autoTable({
-      startY: 35,
-      head: [["Client Name", "Project Name", "Date"]],
-      body: [[company, projectData.project_name, new Date().toLocaleDateString()]],
-      theme: "grid",
-      styles: { fontSize: 12, halign: "left" },
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        lineWidth: 0.5,
-      },
-      bodyStyles: { lineWidth: 0.5 },
-    });
+    img.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+        const imgData = canvas.toDataURL("image/png");
+        doc.addImage(imgData, "PNG", 20, 10, 60, 30);
 
-    doc.autoTable({
-      startY: doc.lastAutoTable.finalY + 10,
-      head: [["Item No.", "Description", "Quantity", "Unit", "Rate", "Amount"]],
-      body: quotation.items.map((item, index) => [
-        index + 1,
-        item.description,
-        item.quantity,
-        item.unit,
-        Number(item.rate).toFixed(2),
-        Number(item.amount).toFixed(2),
-      ]),
-      theme: "grid",
-      styles: { fontSize: 12, halign: "center" },
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        lineWidth: 0.5,
-      },
-      bodyStyles: { lineWidth: 0.5 },
-    });
+        doc.setFontSize(18);
+        doc.text("SaiSamarth Polytech Pvt. Ltd.", 15, 50);
+        doc.setFontSize(14);
+        doc.text(`Quotation for ${quotation.projectData.project_name}`, 15, 60);
 
-    const taxableValue = quotation.items.reduce(
-      (sum, item) => sum + Number(item.amount),
-      0
-    );
-    const igst = taxableValue * 0.18;
-    const grandTotal = taxableValue + igst;
+        doc.autoTable({
+            startY: 70,
+            head: [["Client Name", "Project Name", "Date"]],
+            body: [[quotation.company, quotation.projectData.project_name, new Date().toLocaleDateString()]],
+            theme: "grid",
+            styles: { fontSize: 12, halign: "left" },
+        });
 
-    doc.autoTable({
-      startY: doc.lastAutoTable.finalY + 10,
-      head: [["Summary", "Amount"]],
-      body: [
-        ["Taxable Value", `${taxableValue.toFixed(2)}`],
-        ["IGST (18%)", `${igst.toFixed(2)}`],
-        ["Grand Total", `${grandTotal.toFixed(2)}`],
-      ],
-      theme: "grid",
-      styles: { fontSize: 12, halign: "left" },
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        lineWidth: 0.5,
-      },
-      bodyStyles: { lineWidth: 0.5 },
-    });
+        doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 10,
+            head: [["Item No.", "Description", "Quantity", "Unit", "Rate", "Amount"]],
+            body: quotation.items.map((item, index) => [
+                index + 1,
+                item.description,
+                item.quantity,
+                item.unit,
+                Number(item.rate).toFixed(2),
+                Number(item.amount).toFixed(2),
+            ]),
+            theme: "grid",
+            styles: { fontSize: 12, halign: "center" },
+        });
 
-    doc.autoTable({
-      startY: doc.lastAutoTable.finalY + 20,
-      body: [
-        ["Subject to Mumbai Jurisdiction", "For SaiSamarth Polytech Pvt. Ltd."],
-        ["", "Director"],
-      ],
-      theme: "grid",
-      styles: { fontSize: 12, halign: "left" },
-      bodyStyles: { lineWidth: 0.5 },
-    });
+        const taxableValue = quotation.items.reduce((sum, item) => sum + Number(item.amount), 0);
+        const igst = taxableValue * 0.18;
+        const grandTotal = taxableValue + igst;
 
-    doc.save(`Quotation_${projectData.project_name}.pdf`);
-  };
+        doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 10,
+            head: [["Summary", "Amount"]],
+            body: [
+                ["Taxable Value", `${taxableValue.toFixed(2)}`],
+                ["IGST (18%)", `${igst.toFixed(2)}`],
+                ["Grand Total", `${grandTotal.toFixed(2)}`],
+            ],
+            theme: "grid",
+            styles: { fontSize: 12, halign: "left" },
+        });
+
+        doc.addPage();
+        doc.setFontSize(12);
+        doc.text("TERMS & CONDITIONS:", 20, 30);
+        const terms = [
+            "1. The above rates include material and application charges.",
+            "2. The above rate is based on standard consumption, extra material will be charged extra.",
+            "3. ESIC Code No. 34000269260000999.",
+            "4. EPF Code No. MH/THN/204512.",
+            "5. Any tax changes by the government will be applicable.",
+            "6. 3-phase electricity, water, and lighting must be provided by the client.",
+            "7. Storage space must be provided.",
+            "8. Any localized repairs required on the wall surface shall be done by you.",
+        ];
+
+        let termY = 40;
+        terms.forEach((term) => {
+            doc.text(term, 20, termY);
+            termY += 10;
+        });
+
+        doc.text("Hope you will find our offer in line with your requirements.", 20, termY + 20);
+        doc.text("Thanking you, Cordially,", 20, termY + 30);
+        doc.text("For, Sai Samarth Polytech Pvt. Ltd.", 20, termY + 40);
+        doc.text("Atulkumar Patil – Director (09324529411)", 20, termY + 50);
+
+        doc.save(`Quotation_${quotation.projectData.project_name}.pdf`);
+    };
+
+    img.onerror = function () {
+        console.error("Error loading image");
+    };
+};
+
 
   const generateBillPDF = (billData) => {
     const doc = new jsPDF();
