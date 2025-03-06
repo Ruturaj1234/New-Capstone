@@ -74,38 +74,36 @@ const QuotationInfo = () => {
     }
   }, [company, projectId]);
 
- const handleDownload = (type) => {
+  const handleDownload = (type) => {
     if (!projectData) {
-        alert("Project data not available yet. Please wait.");
-        return;
+      alert("Project data not available yet. Please wait.");
+      return;
     }
     if (!clientId && type === "bill") {
-        alert("Client ID not available yet. Please wait.");
-        return;
+      alert("Client ID not available yet. Please wait.");
+      return;
     }
 
     if (type === "quotation") {
-        fetch(
-            http://localhost/login-backend/Owner-management/get_saved_quotations_by_names.php?project_id=${projectId}
-        )
-            .then((response) => response.json())
-            .then((data) => {
-                if (!data.success || !data.quotations[0]) {
-                    alert(data.message || "No quotation found for this project.");
-                    return;
-                }
-                // Merge projectData into the quotation object
-                const quotationWithProjectData = {
-                    ...data.quotations[0],
-                    projectData: projectData,
-                };
-                generateQuotationPDF(quotationWithProjectData);
-            })
-            .catch((error) => {
-                console.error("Error fetching quotation:", error);
-                alert("Failed to download quotation PDF.");
-            });
-    }
+      fetch(
+        `http://localhost/login-backend/Owner-management/get_saved_quotations_by_names.php?project_id=${projectId}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (!data.success || !data.quotations[0]) {
+            alert(data.message || "No quotation found for this project.");
+            return;
+          }
+          const quotationWithProjectData = {
+            ...data.quotations[0],
+            projectData: projectData,
+          };
+          generateQuotationPDF(quotationWithProjectData);
+        })
+        .catch((error) => {
+          console.error("Error fetching quotation:", error);
+          alert("Failed to download quotation PDF.");
+        });
     } else if (type === "bill") {
       fetch(
         `http://localhost/login-backend/Owner-management/getBillData.php?clientId=${clientId}&projectId=${projectId}`
@@ -150,108 +148,113 @@ const QuotationInfo = () => {
     generateTrackRecordPDF(trackRecords);
   };
 
- const generateQuotationPDF = (quotation) => {
+  const generateQuotationPDF = (quotation) => {
     const doc = new jsPDF();
     const imageUrl = "/public/image.png";
     const img = new Image();
     img.src = imageUrl;
 
-    img.onload = function () {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, img.width, img.height);
-        const imgData = canvas.toDataURL("image/png");
-        doc.addImage(imgData, "PNG", 20, 10, 60, 30);
+img.onload = function () {
+  const pageWidth = doc.internal.pageSize.getWidth(); // Get full page width
+  const aspectRatio = img.width / img.height; // Calculate aspect ratio
+  const imgWidth = pageWidth; // Full width
+  const imgHeight = pageWidth / aspectRatio; // Maintain aspect ratio
 
-        doc.setFontSize(18);
-        doc.text("SaiSamarth Polytech Pvt. Ltd.", 15, 50);
-        doc.setFontSize(14);
-        // Use projectData from state instead of quotation.projectData
-        doc.text(Quotation for ${projectData?.project_name || "Unknown Project"}, 15, 60);
+  // Draw the image at (0, 0) to cover the full width
+  doc.addImage(img, "PNG", 0, 0, imgWidth, imgHeight);
 
-        doc.autoTable({
-            startY: 70,
-            head: [["Client Name", "Project Name", "Date"]],
-            body: [
-                [
-                    quotation.name, // Use quotation.name instead of company
-                    projectData?.project_name || "Unknown Project",
-                    new Date().toLocaleDateString(),
-                ],
-            ],
-            theme: "grid",
-            styles: { fontSize: 12, halign: "left" },
-        });
+  // Adjust text position based on image height
+  let textY = imgHeight + 10;
 
-        // Rest of the code remains the same...
-        doc.autoTable({
-            startY: doc.lastAutoTable.finalY + 10,
-            head: [["Item No.", "Description", "Quantity", "Unit", "Rate", "Amount"]],
-            body: quotation.items.map((item, index) => [
-                index + 1,
-                item.description,
-                item.quantity,
-                item.unit,
-                Number(item.rate).toFixed(2),
-                Number(item.amount).toFixed(2),
-            ]),
-            theme: "grid",
-            styles: { fontSize: 12, halign: "center" },
-        });
+  doc.setFontSize(18);
+  doc.text("SaiSamarth Polytech Pvt. Ltd.", 15, textY);
+  textY += 10;
 
-        const taxableValue = quotation.items.reduce(
-            (sum, item) => sum + Number(item.amount),
-            0
-        );
-        const igst = taxableValue * 0.18;
-        const grandTotal = taxableValue + igst;
+  doc.setFontSize(14);
+  doc.text(`Quotation for ${projectData?.project_name || "Unknown Project"}`, 15, textY);
+  
+  // Continue with the rest of the document...
 
-        doc.autoTable({
-            startY: doc.lastAutoTable.finalY + 10,
-            head: [["Summary", "Amount"]],
-            body: [
-                ["Taxable Value", ${taxableValue.toFixed(2)}],
-                ["IGST (18%)", ${igst.toFixed(2)}],
-                ["Grand Total", ${grandTotal.toFixed(2)}],
-            ],
-            theme: "grid",
-            styles: { fontSize: 12, halign: "left" },
-        });
+      doc.autoTable({
+        startY: 70,
+        head: [["Client Name", "Project Name", "Date"]],
+        body: [
+          [
+            quotation.name,
+            projectData?.project_name || "Unknown Project",
+            new Date().toLocaleDateString(),
+          ],
+        ],
+        theme: "grid",
+        styles: { fontSize: 12, halign: "left" },
+      });
 
-        doc.addPage();
-        doc.setFontSize(12);
-        doc.text("TERMS & CONDITIONS:", 20, 30);
-        const terms = [
-            "1. The above rates include material and application charges.",
-            "2. The above rate is based on standard consumption, extra material will be charged extra.",
-            "3. ESIC Code No. 34000269260000999.",
-            "4. EPF Code No. MH/THN/204512.",
-            "5. Any tax changes by the government will be applicable.",
-            "6. 3-phase electricity, water, and lighting must be provided by the client.",
-            "7. Storage space must be provided.",
-            "8. Any localized repairs required on the wall surface shall be done by you.",
-        ];
+      doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [["Item No.", "Description", "Quantity", "Unit", "Rate", "Amount"]],
+        body: quotation.items.map((item, index) => [
+          index + 1,
+          item.description,
+          item.quantity,
+          item.unit,
+          Number(item.rate).toFixed(2),
+          Number(item.amount).toFixed(2),
+        ]),
+        theme: "grid",
+        styles: { fontSize: 12, halign: "center" },
+      });
 
-        let termY = 40;
-        terms.forEach((term) => {
-            doc.text(term, 20, termY);
-            termY += 10;
-        });
+      const taxableValue = quotation.items.reduce(
+        (sum, item) => sum + Number(item.amount),
+        0
+      );
+      const igst = taxableValue * 0.18;
+      const grandTotal = taxableValue + igst;
 
-        doc.text("Hope you will find our offer in line with your requirements.", 20, termY + 20);
-        doc.text("Thanking you, Cordially,", 20, termY + 30);
-        doc.text("For, Sai Samarth Polytech Pvt. Ltd.", 20, termY + 40);
-        doc.text("Atulkumar Patil – Director (09324529411)", 20, termY + 50);
+      doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [["Summary", "Amount"]],
+        body: [
+          ["Taxable Value", `${taxableValue.toFixed(2)}`],
+          ["IGST (18%)", `${igst.toFixed(2)}`],
+          ["Grand Total", `${grandTotal.toFixed(2)}`],
+        ],
+        theme: "grid",
+        styles: { fontSize: 12, halign: "left" },
+      });
 
-        doc.save(Quotation_${projectData?.project_name || "Unknown"}.pdf);
+      doc.addPage();
+      doc.setFontSize(12);
+      doc.text("TERMS & CONDITIONS:", 20, 30);
+      const terms = [
+        "1. The above rates include material and application charges.",
+        "2. The above rate is based on standard consumption, extra material will be charged extra.",
+        "3. ESIC Code No. 34000269260000999.",
+        "4. EPF Code No. MH/THN/204512.",
+        "5. Any tax changes by the government will be applicable.",
+        "6. 3-phase electricity, water, and lighting must be provided by the client.",
+        "7. Storage space must be provided.",
+        "8. Any localized repairs required on the wall surface shall be done by you.",
+      ];
+
+      let termY = 40;
+      terms.forEach((term) => {
+        doc.text(term, 20, termY);
+        termY += 10;
+      });
+
+      doc.text("Hope you will find our offer in line with your requirements.", 20, termY + 20);
+      doc.text("Thanking you, Cordially,", 20, termY + 30);
+      doc.text("For, Sai Samarth Polytech Pvt. Ltd.", 20, termY + 40);
+      doc.text("Atulkumar Patil – Director (09324529411)", 20, termY + 50);
+
+      doc.save(`Quotation_${projectData?.project_name || "Unknown"}.pdf`);
     };
 
     img.onerror = function () {
-        console.error("Error loading image");
+      console.error("Error loading image");
     };
-};
+  };
 
   const generateBillPDF = (billData) => {
     const doc = new jsPDF();
@@ -365,7 +368,7 @@ const QuotationInfo = () => {
     doc.setFontSize(18);
     doc.text("SaiSamarth Polytech Pvt. Ltd.", 15, 15);
     doc.setFontSize(14);
-    doc.text(`Track Record for ${projectData.project_name}`, 15, 25);
+    doc.text(`Track Record for ${projectData?.project_name || "Unknown Project"}`, 15, 25);
 
     doc.autoTable({
       startY: 35,
@@ -373,9 +376,7 @@ const QuotationInfo = () => {
       body: [
         ["Status", trackRecords.status],
         [
-          trackRecords.status === "Completed"
-            ? "Completion Date"
-            : "Last Report Date",
+          trackRecords.status === "Completed" ? "Completion Date" : "Last Report Date",
           trackRecords.status === "Completed" && trackRecords.date_completed
             ? new Date(trackRecords.date_completed).toLocaleDateString()
             : trackRecords.status === "In Progress" && trackRecords.created_at
@@ -384,17 +385,12 @@ const QuotationInfo = () => {
         ],
         ["Challenges", trackRecords.challenges || "N/A"],
         ["Progress Percentage", `${trackRecords.progress_percentage}%`],
-        [
-          "Summary of Work Completed",
-          trackRecords.summary_work_completed || "N/A",
-        ],
+        ["Summary of Work Completed", trackRecords.summary_work_completed || "N/A"],
         ["Next Steps", trackRecords.next_steps || "N/A"],
         [
           "Estimated Completion Date",
           trackRecords.estimated_completion_date
-            ? new Date(
-                trackRecords.estimated_completion_date
-              ).toLocaleDateString()
+            ? new Date(trackRecords.estimated_completion_date).toLocaleDateString()
             : "N/A",
         ],
       ],
@@ -452,7 +448,7 @@ const QuotationInfo = () => {
       }
     }
 
-    doc.save(`TrackRecord_${projectData.project_name}.pdf`);
+    doc.save(`TrackRecord_${projectData?.project_name || "Unknown"}.pdf`);
   };
 
   return (
@@ -547,6 +543,7 @@ const QuotationInfo = () => {
                     View project progress details.
                   </p>
                 </div>
+                <Download className="w-6 h-6 text-gray-400 group-hover:text-purple-500" />
               </button>
             </div>
 
@@ -566,19 +563,14 @@ const QuotationInfo = () => {
                         : "Last Report Date"}
                       :
                     </strong>{" "}
-                    {trackRecords.status === "Completed" &&
-                    trackRecords.date_completed
-                      ? new Date(
-                          trackRecords.date_completed
-                        ).toLocaleDateString()
-                      : trackRecords.status === "In Progress" &&
-                        trackRecords.created_at
+                    {trackRecords.status === "Completed" && trackRecords.date_completed
+                      ? new Date(trackRecords.date_completed).toLocaleDateString()
+                      : trackRecords.status === "In Progress" && trackRecords.created_at
                       ? new Date(trackRecords.created_at).toLocaleString()
                       : "N/A"}
                   </p>
                   <p>
-                    <strong>Challenges:</strong>{" "}
-                    {trackRecords.challenges || "N/A"}
+                    <strong>Challenges:</strong> {trackRecords.challenges || "N/A"}
                   </p>
                   <div>
                     <strong>Progress Percentage:</strong>
@@ -590,9 +582,7 @@ const QuotationInfo = () => {
                               ? "bg-gradient-to-r from-green-400 to-green-600"
                               : "bg-gradient-to-r from-orange-400 to-orange-600"
                           }`}
-                          style={{
-                            width: `${trackRecords.progress_percentage}%`,
-                          }}
+                          style={{ width: `${trackRecords.progress_percentage}%` }}
                         ></div>
                       </div>
                       <span className="ml-4 text-gray-800 font-medium">
@@ -605,15 +595,12 @@ const QuotationInfo = () => {
                     {trackRecords.summary_work_completed || "N/A"}
                   </p>
                   <p>
-                    <strong>Next Steps:</strong>{" "}
-                    {trackRecords.next_steps || "N/A"}
+                    <strong>Next Steps:</strong> {trackRecords.next_steps || "N/A"}
                   </p>
                   <p>
                     <strong>Estimated Completion Date:</strong>{" "}
                     {trackRecords.estimated_completion_date
-                      ? new Date(
-                          trackRecords.estimated_completion_date
-                        ).toLocaleDateString()
+                      ? new Date(trackRecords.estimated_completion_date).toLocaleDateString()
                       : "N/A"}
                   </p>
                   <div>
