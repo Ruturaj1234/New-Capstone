@@ -74,32 +74,38 @@ const QuotationInfo = () => {
     }
   }, [company, projectId]);
 
-  const handleDownload = (type) => {
+ const handleDownload = (type) => {
     if (!projectData) {
-      alert("Project data not available yet. Please wait.");
-      return;
+        alert("Project data not available yet. Please wait.");
+        return;
     }
     if (!clientId && type === "bill") {
-      alert("Client ID not available yet. Please wait.");
-      return;
+        alert("Client ID not available yet. Please wait.");
+        return;
     }
 
     if (type === "quotation") {
-      fetch(
-        `http://localhost/login-backend/Owner-management/get_saved_quotations_by_names.php?project_id=${projectId}`
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          if (!data.success || !data.quotations[0]) {
-            alert(data.message || "No quotation found for this project.");
-            return;
-          }
-          generateQuotationPDF(data.quotations[0]);
-        })
-        .catch((error) => {
-          console.error("Error fetching quotation:", error);
-          alert("Failed to download quotation PDF.");
-        });
+        fetch(
+            http://localhost/login-backend/Owner-management/get_saved_quotations_by_names.php?project_id=${projectId}
+        )
+            .then((response) => response.json())
+            .then((data) => {
+                if (!data.success || !data.quotations[0]) {
+                    alert(data.message || "No quotation found for this project.");
+                    return;
+                }
+                // Merge projectData into the quotation object
+                const quotationWithProjectData = {
+                    ...data.quotations[0],
+                    projectData: projectData,
+                };
+                generateQuotationPDF(quotationWithProjectData);
+            })
+            .catch((error) => {
+                console.error("Error fetching quotation:", error);
+                alert("Failed to download quotation PDF.");
+            });
+    }
     } else if (type === "bill") {
       fetch(
         `http://localhost/login-backend/Owner-management/getBillData.php?clientId=${clientId}&projectId=${projectId}`
@@ -144,7 +150,7 @@ const QuotationInfo = () => {
     generateTrackRecordPDF(trackRecords);
   };
 
-  const generateQuotationPDF = (quotation) => {
+ const generateQuotationPDF = (quotation) => {
     const doc = new jsPDF();
     const imageUrl = "/public/image.png";
     const img = new Image();
@@ -162,16 +168,24 @@ const QuotationInfo = () => {
         doc.setFontSize(18);
         doc.text("SaiSamarth Polytech Pvt. Ltd.", 15, 50);
         doc.setFontSize(14);
-        doc.text(`Quotation for ${quotation.projectData.project_name}`, 15, 60);
+        // Use projectData from state instead of quotation.projectData
+        doc.text(Quotation for ${projectData?.project_name || "Unknown Project"}, 15, 60);
 
         doc.autoTable({
             startY: 70,
             head: [["Client Name", "Project Name", "Date"]],
-            body: [[quotation.company, quotation.projectData.project_name, new Date().toLocaleDateString()]],
+            body: [
+                [
+                    quotation.name, // Use quotation.name instead of company
+                    projectData?.project_name || "Unknown Project",
+                    new Date().toLocaleDateString(),
+                ],
+            ],
             theme: "grid",
             styles: { fontSize: 12, halign: "left" },
         });
 
+        // Rest of the code remains the same...
         doc.autoTable({
             startY: doc.lastAutoTable.finalY + 10,
             head: [["Item No.", "Description", "Quantity", "Unit", "Rate", "Amount"]],
@@ -187,7 +201,10 @@ const QuotationInfo = () => {
             styles: { fontSize: 12, halign: "center" },
         });
 
-        const taxableValue = quotation.items.reduce((sum, item) => sum + Number(item.amount), 0);
+        const taxableValue = quotation.items.reduce(
+            (sum, item) => sum + Number(item.amount),
+            0
+        );
         const igst = taxableValue * 0.18;
         const grandTotal = taxableValue + igst;
 
@@ -195,9 +212,9 @@ const QuotationInfo = () => {
             startY: doc.lastAutoTable.finalY + 10,
             head: [["Summary", "Amount"]],
             body: [
-                ["Taxable Value", `${taxableValue.toFixed(2)}`],
-                ["IGST (18%)", `${igst.toFixed(2)}`],
-                ["Grand Total", `${grandTotal.toFixed(2)}`],
+                ["Taxable Value", ${taxableValue.toFixed(2)}],
+                ["IGST (18%)", ${igst.toFixed(2)}],
+                ["Grand Total", ${grandTotal.toFixed(2)}],
             ],
             theme: "grid",
             styles: { fontSize: 12, halign: "left" },
@@ -228,14 +245,13 @@ const QuotationInfo = () => {
         doc.text("For, Sai Samarth Polytech Pvt. Ltd.", 20, termY + 40);
         doc.text("Atulkumar Patil – Director (09324529411)", 20, termY + 50);
 
-        doc.save(`Quotation_${quotation.projectData.project_name}.pdf`);
+        doc.save(Quotation_${projectData?.project_name || "Unknown"}.pdf);
     };
 
     img.onerror = function () {
         console.error("Error loading image");
     };
 };
-
 
   const generateBillPDF = (billData) => {
     const doc = new jsPDF();
